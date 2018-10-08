@@ -30,6 +30,7 @@ find_library(CPPREST_LIB NAMES cpprest)
 find_path(CPPREST_INCLUDE_DIR NAMES cpprest/http_client.h)
 
 find_package(Boost REQUIRED COMPONENTS system thread locale random)
+find_package(cpprestsdk REQUIRED)
 
 set(SRC_ROOT "${PROJECT_SOURCE_DIR}/src")
 set(HDR_ROOT "${PROJECT_SOURCE_DIR}/include/")
