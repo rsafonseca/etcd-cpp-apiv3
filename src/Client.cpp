@@ -1,21 +1,20 @@
 #include <memory>
-#include "etcd/Client.hpp"
-#include "v3/include/action_constants.hpp"
-#include "v3/include/AsyncTxnResponse.hpp"
-#include "v3/include/AsyncRangeResponse.hpp"
-#include "v3/include/AsyncWatchResponse.hpp"
-#include "v3/include/AsyncDeleteRangeResponse.hpp"
-#include "v3/include/Transaction.hpp"
+#include <etcd/Client.hpp>
+#include <etcd/v3/AsyncTxnResponse.hpp>
+#include <etcd/v3/AsyncRangeResponse.hpp>
+#include <etcd/v3/AsyncWatchResponse.hpp>
+#include <etcd/v3/AsyncDeleteRangeResponse.hpp>
+#include <etcd/v3/Transaction.hpp>
 #include <iostream>
 
-#include "v3/include/AsyncSetAction.hpp"
-#include "v3/include/AsyncCompareAndSwapAction.hpp"
-#include "v3/include/AsyncCompareAndDeleteAction.hpp"
-#include "v3/include/AsyncUpdateAction.hpp"
-#include "v3/include/AsyncGetAction.hpp"
-#include "v3/include/AsyncDeleteAction.hpp"
-#include "v3/include/AsyncWatchAction.hpp"
-#include "v3/include/AsyncLeaseGrantAction.hpp"
+#include <etcd/v3/AsyncSetAction.hpp>
+#include <etcd/v3/AsyncCompareAndSwapAction.hpp>
+#include <etcd/v3/AsyncCompareAndDeleteAction.hpp>
+#include <etcd/v3/AsyncUpdateAction.hpp>
+#include <etcd/v3/AsyncGetAction.hpp>
+#include <etcd/v3/AsyncDeleteAction.hpp>
+#include <etcd/v3/AsyncWatchAction.hpp>
+#include <etcd/v3/AsyncLeaseGrantAction.hpp>
 
 
 using grpc::Channel;

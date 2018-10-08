@@ -1,13 +1,77 @@
-add_library(etcd-cpp-api SHARED ../proto/kv.pb.cc ../proto/auth.pb.cc ../proto/rpc.pb.cc ../proto/rpc.grpc.pb.cc ../v3/src/AsyncTxnResponse.cpp ../v3/src/AsyncRangeResponse.cpp ../v3/src/Transaction.cpp ../v3/src/action_constants.cpp ../v3/src/AsyncSetAction.cpp ../v3/src/AsyncCompareAndSwapAction.cpp ../v3/src/AsyncUpdateAction.cpp ../v3/src/AsyncGetAction.cpp ../v3/src/AsyncDeleteAction.cpp ../v3/src/AsyncCompareAndDeleteAction.cpp ../v3/src/Action.cpp ../v3/src/AsyncWatchAction.cpp ../v3/src/V3Response.cpp ../v3/src/AsyncDeleteRangeResponse.cpp ../v3/src/AsyncWatchResponse.cpp ../v3/src/AsyncLeaseGrantResponse.cpp ../v3/src/AsyncLeaseGrantAction.cpp ../v3/src/KeyValue.cpp Client.cpp Response.cpp Value.cpp SyncClient.cpp Watcher.cpp)
-set_property(TARGET etcd-cpp-api PROPERTY CXX_STANDARD 11)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-target_link_libraries(etcd-cpp-api ${CPPREST_LIB} boost_system ssl crypto protobuf grpc++)
+set(CLIENT_HDR_ROOT ${HDR_ROOT}/etcd/)
+set(V3_HDR_ROOT ${CLIENT_HDR_ROOT}/v3)
+set(V3_SRC_ROOT ${SRC_ROOT}/v3)
+set(V3_PROTO_ROOT ${V3_HDR_ROOT}/proto)
 
-install (TARGETS etcd-cpp-api DESTINATION lib)
-install (FILES ../etcd/Client.hpp
-               ../etcd/SyncClient.hpp
-               ../etcd/Response.hpp
-               ../etcd/Value.hpp
-               ../etcd/Watcher.hpp
+set(SOURCES ${SRC_ROOT}/Client.cpp
+		${SRC_ROOT}/Response.cpp
+		${SRC_ROOT}/Value.cpp
+		${SRC_ROOT}/SyncClient.cpp
+		${SRC_ROOT}/Watcher.cpp)
+
+set(PROTO_SOURCES ${V3_PROTO_ROOT}/auth.pb.cc
+		${V3_PROTO_ROOT}/kv.pb.cc
+		${V3_PROTO_ROOT}/rpc.pb.cc
+		${V3_PROTO_ROOT}/rpc.grpc.pb.cc)
+
+
+set(V3_SOURCES ${V3_SRC_ROOT}/AsyncTxnResponse.cpp 
+		 ${V3_SRC_ROOT}/AsyncRangeResponse.cpp
+		 ${V3_SRC_ROOT}/Transaction.cpp
+		 ${V3_SRC_ROOT}/action_constants.cpp
+		 ${V3_SRC_ROOT}/AsyncSetAction.cpp
+		 ${V3_SRC_ROOT}/AsyncCompareAndSwapAction.cpp
+		 ${V3_SRC_ROOT}/AsyncUpdateAction.cpp
+		 ${V3_SRC_ROOT}/AsyncGetAction.cpp
+		 ${V3_SRC_ROOT}/AsyncDeleteAction.cpp
+		 ${V3_SRC_ROOT}/AsyncCompareAndDeleteAction.cpp
+		 ${V3_SRC_ROOT}/Action.cpp
+		 ${V3_SRC_ROOT}/AsyncWatchAction.cpp
+		 ${V3_SRC_ROOT}/V3Response.cpp
+		 ${V3_SRC_ROOT}/AsyncDeleteRangeResponse.cpp
+		 ${V3_SRC_ROOT}/AsyncWatchResponse.cpp
+		 ${V3_SRC_ROOT}/AsyncLeaseGrantResponse.cpp
+		 ${V3_SRC_ROOT}/AsyncLeaseGrantAction.cpp
+		 ${V3_SRC_ROOT}/KeyValue.cpp)
+
+add_library(${PROJECT_NAME} ${LIBRARY_TYPE} ${PROTO_SOURCES} ${V3_SOURCES} ${SOURCES})
+
+target_link_libraries(${PROJECT_NAME} ${CPPREST_LIB} boost_system ssl crypto protobuf grpc grpc++ pthread)
+
+install(TARGETS ${PROJECT_NAME} DESTINATION lib)
+
+install(FILES ${CLIENT_HDR_ROOT}/Client.hpp
+               ${CLIENT_HDR_ROOT}/SyncClient.hpp
+               ${CLIENT_HDR_ROOT}/Response.hpp
+               ${CLIENT_HDR_ROOT}/Value.hpp
+               ${CLIENT_HDR_ROOT}/Watcher.hpp
                DESTINATION include/etcd)
 
+install(FILES ${V3_HDR_ROOT}/action_constants.hpp
+		${V3_HDR_ROOT}/AsyncCompareAndSwapAction.hpp
+		${V3_HDR_ROOT}/AsyncGetAction.hpp
+		${V3_HDR_ROOT}/AsyncRangeResponse.hpp
+		${V3_HDR_ROOT}/AsyncUpdateAction.hpp
+		${V3_HDR_ROOT}/KeyValue.hpp
+		${V3_HDR_ROOT}/Action.hpp	
+		${V3_HDR_ROOT}/AsyncDeleteAction.hpp
+		${V3_HDR_ROOT}/AsyncLeaseGrantAction.hpp
+		${V3_HDR_ROOT}/AsyncSetAction.hpp
+		${V3_HDR_ROOT}/AsyncWatchAction.hpp
+		${V3_HDR_ROOT}/Transaction.hpp
+		${V3_HDR_ROOT}/AsyncCompareAndDeleteAction.hpp
+		${V3_HDR_ROOT}/AsyncDeleteRangeResponse.hpp
+		${V3_HDR_ROOT}/AsyncLeaseGrantResponse.hpp
+		${V3_HDR_ROOT}/AsyncTxnResponse.hpp
+		${V3_HDR_ROOT}/AsyncWatchResponse.hpp
+		${V3_HDR_ROOT}/V3Response.hpp
+               DESTINATION include/etcd/v3/)
+
+install(FILES ${V3_PROTO_ROOT}/auth.pb.h
+		${V3_PROTO_ROOT}/etcdserver.pb.h
+		${V3_PROTO_ROOT}/kv.pb.h
+		${V3_PROTO_ROOT}/rpc.grpc.pb.h
+		${V3_PROTO_ROOT}/rpc.pb.h
+               DESTINATION include/etcd/v3/proto)

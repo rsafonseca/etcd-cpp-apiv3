@@ -1,49 +1,77 @@
 etcd-cpp-api is a C++ API for [etcd]
 
 ## Requirements
-1. Build Boost Library(http://www.boost.org/doc/libs/1_61_0/more/getting_started/unix-variants.html)
-    * You can use: 
-    ```
-    ./bootstrap.sh --with-libraries=system,thread,locale,random,chrono,regex,filesystem
-    ./b2 install
-    ```
-    * The above command will only compile those libraries indicated, thus it takes less time to build boost
+0. CMake 3.1.3 and greater required
+    * Also needed:
+	autoconf
+	automake
+	curl
+	gcc
+	gcc-c++
+	gflags-devel
+	git
+	glib2-devel
+	glibc-common
+	glibc-devel
+	gtest-devel
+	libtool
+	make
+	patch
+	unzip
+	wget
+	which
+	xz-devel
+	zlib-devel
+
+1. Build Boost Library (1.55 required for DSSL Cloud)
 
 2. Build Casablanca:
-    * Instructions on how to build is here: https://github.com/Microsoft/cpprestsdk/wiki
-    * For Linux environment you can omit libboost-all-dev during apt-get install, if you already have boost library installed.
-
-3. Install Protobuf:
-    * https://github.com/google/protobuf/blob/master/src/README.md
-
-4. Install Protoc for C++:
-    * https://github.com/grpc/grpc/blob/release-0_14/INSTALL.md
-
-   
-## Compatible etcd version
-Build master branch of etcd in github. As of writing, current releases of etcd does not yet support prev_value.
-Only the master branch supports it.
-https://github.com/coreos/etcd/blob/master/Documentation/dl_build.md (see: Build the latest version)
-
-## Updates from etcdv2 cpp client to etcdv3 cpp client
-See "handling directory nodes" section
-
-## compiling .proto
-Proto files are stored in /proto. The proto files defined the interface of etcdv3.
-
-You can compile it like this(if you are running this command inside /proto folder):
-```
-protoc -I . --grpc_out=. --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` ./rpc.proto
-protoc -I . --cpp_out=. ./*.proto
+```bash
+	git clone https://github.com/Microsoft/cpprestsdk.git casablanca &&\
+	cd casablanca &&\
+	git checkout tags/v2.10.6 &&\
+	mkdir build && cd build &&\
+	cmake .. -DCMAKE_BUILD_TYPE=Release -DWERROR=OFF -DCMAKE_INSTALL_PREFIX=/usr &&\
+	make &&\
+	make install
 ```
 
-Protofiles for etcdv3 can be found here:
-* https://github.com/coreos/etcd/tree/master/auth/authpb
-* https://github.com/coreos/etcd/tree/master/etcdserver/etcdserverpb
-* https://github.com/coreos/etcd/tree/master/mvcc/mvccpb
+3. Install Protoc & Protobuf & gRPC for C++:
+```bash
+	git clone https://github.com/grpc/grpc.git grpc &&\
+	cd grpc &&\
+	git checkout tags/v1.15.1 &&\
+	git submodule update --init --recursive &&\
+	cd third_party/protobuf &&\
+	./autogen.sh &&\
+	./configure --prefix=/usr &&\
+	make && make check && make install && make clean &&\
+	ldconfig &&\
+	cd - &&\
+	make &&\
+	make install
+```
 
-Note: Protofiles in the project is not sync to the protofiles in etcd master branch. If you
-want to update the protofiles in this project, you need to manually update it.
+## etcd 3.3.9 required for DSSL Cloud
+
+## Build API
+0. Set LIBRARY_TYPE to desired value (STATIC or SHARED) in root CMakeLists.txt
+1. If needed, generate .h and .cc files from .proto files, they must be placed into include/etcd/v3/proto directory:
+```bash
+	cd proto &&\
+	protoc -I . --grpc_out=../include/etcd/client/v3/proto/ --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` ./rpc.proto &&\
+	protoc -I . --cpp_out=../include/etcd/client/v3/proto/ ./*.proto &&\
+	cd -
+```
+2. Build & install API:
+```bash
+	mkdir build && cd build &&\
+	cmake .. &&\
+	make &&\
+	make install
+```
+
+
 
 ## generic notes
 
