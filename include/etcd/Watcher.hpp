@@ -7,29 +7,50 @@
 
 #include <grpc++/grpc++.h>
 
-using etcdserverpb::KV;
 using etcdserverpb::Watch;
 using grpc::Channel;
 
 namespace etcd
 {
-  class Watcher
-  {
-  public:
-    Watcher(std::string const & etcd_url, std::string const & key, std::function<void(Response)> callback);
-    void Cancel();
-    ~Watcher();
 
-  protected:
-    void doWatch(std::string const & key, std::function<void(Response)> callback);
+class Watcher
+{
+public:
+	Watcher(
+		const std::string & address,
+		const std::string & key,
+		std::function<void(Response)> callback);
+	Watcher(
+		const std::shared_ptr<grpc::Channel> & channel,
+		const std::string & key,
+		std::function<void(Response)> callback);
+	Watcher(
+		const std::string & address,
+		const std::string & key,
+		const bool recursive,
+		const int fromIndex,
+		std::function<void(Response)> callback);
+	Watcher(
+		const std::shared_ptr<Channel> & channel,
+		const std::string & key,
+		const bool recursive,
+		const int fromIndex,
+		std::function<void(Response)> callback);
+	void Cancel();
+	bool Cancelled() const;
+	~Watcher();
 
-    int index;
-    std::function<void(Response)> callback;
-    pplx::task<void> currentTask;
-    std::unique_ptr<Watch::Stub> watchServiceStub;
-    std::unique_ptr<KV::Stub> stub_;
-    std::unique_ptr<etcdv3::AsyncWatchAction> call;
-  };
-}
+protected:
+	void doWatch();
+
+	const std::shared_ptr<Channel> channel;
+	const std::unique_ptr<Watch::Stub> watchServiceStub;
+	etcdv3::ActionParameters watch_action_parameters;
+	std::function<void(Response)> callback;
+	bool isCancelled;
+	pplx::task<void> currentTask;
+	std::unique_ptr<etcdv3::AsyncWatchAction> call;
+};
+} // namespace etcd
 
 #endif

@@ -1,44 +1,79 @@
+#include <etcd/Utils.h>
 #include <etcd/Watcher.hpp>
+#include <etcd/Client.hpp>
 
-etcd::Watcher::Watcher(std::string const & address, std::string const & key, std::function<void(Response)> callback)
+
+etcd::Watcher::Watcher(
+	const std::string & address,
+	const std::string & key,
+	std::function<void(Response)> callback)
+	: Watcher::Watcher(etcd::utils::createChannel(address), key, true, 0, callback)
+{}
+
+etcd::Watcher::Watcher(
+	const std::shared_ptr<grpc::Channel> & channel,
+	const std::string & key,
+	std::function<void(Response)> callback)
+	: Watcher::Watcher(channel, key, true, 0, callback)
+{}
+
+etcd::Watcher::Watcher(
+	const std::string & address,
+	const std::string & key,
+	const bool recursive,
+	const int fromIndex,
+	std::function<void(Response)> callback)
+	: Watcher::Watcher(etcd::utils::createChannel(address), key, recursive, fromIndex, callback)
+{}
+
+etcd::Watcher::Watcher(
+	const std::shared_ptr<grpc::Channel> & channel,
+	const std::string & key,
+	const bool recursive,
+	const int fromIndex,
+	std::function<void(Response)> callback)
+	: channel(channel)
+	, watchServiceStub(Watch::NewStub(channel))
+	, callback(callback)
+	, isCancelled(false)
 {
-  std::string stripped_address(address);
-  std::string substr("http://");
-  std::string::size_type i = stripped_address.find(substr);
-  if(i != std::string::npos)
-  {
-    stripped_address.erase(i,substr.length());
-  }
-  std::shared_ptr<Channel> channel = grpc::CreateChannel(stripped_address, grpc::InsecureChannelCredentials());
-  watchServiceStub= Watch::NewStub(channel);
-
-  doWatch(key, callback);
-}
-
-
-etcd::Watcher::~Watcher()
-{
-  call->CancelWatch();
-  currentTask.wait();
+	watch_action_parameters.key = key;
+	watch_action_parameters.withPrefix = recursive;
+	watch_action_parameters.revision = fromIndex;
+	watch_action_parameters.watch_stub = watchServiceStub.get();
+	doWatch();
 }
 
 void etcd::Watcher::Cancel()
 {
-  call->CancelWatch();
-  currentTask.wait();
+	if (isCancelled) {
+		return;
+	}
+	if (call) {
+		call->CancelWatch();
+		currentTask.wait();
+		call.reset();
+	}
+	isCancelled = true;
 }
 
-void etcd::Watcher::doWatch(std::string const & key, std::function<void(Response)> callback)
+bool etcd::Watcher::Cancelled() const
 {
-  etcdv3::ActionParameters params;
-  params.key.assign(key);
-  params.withPrefix = true;
-  params.watch_stub = watchServiceStub.get();
-  params.revision = 0;
-  call.reset(new etcdv3::AsyncWatchAction(params));
+	return isCancelled;
+}
 
-  currentTask = pplx::task<void>([this, callback]()
-  {  
-    return call->waitForResponse(callback);
-  });
+etcd::Watcher::~Watcher()
+{
+	try {
+		Cancel();
+	} catch (...) {}
+}
+
+void etcd::Watcher::doWatch()
+{
+	call.reset(new etcdv3::AsyncWatchAction(watch_action_parameters));
+	currentTask = pplx::task<void>([this]()
+	{
+		call->waitForResponse(callback);
+	});
 }

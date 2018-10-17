@@ -11,10 +11,10 @@ void printResponse(etcd::Response const & resp)
   ++watcher_called;
   std::cout << "print response called" << std::endl;
   if (resp.error_code())
-    std::cout << resp.error_code() << ": " << resp.error_message() << std::endl;
+    std::cout << "ERROR:\n" << resp.error_code() << ": " << resp.error_message() << std::endl;
   else
   {
-    std::cout << resp.action() << " " << resp.value().as_string() << std::endl;
+    std::cout << "Action: " << resp.action() << ", value: " << resp.value().as_string() << std::endl;
     std::cout << "Previous value: " << resp.prev_value().as_string() << std::endl;
   }
 }
@@ -49,6 +49,7 @@ TEST_CASE("create watcher")
   
   etcd::SyncClient etcd(etcd_uri);
   etcd.rmdir("/test", true);
+  etcd.set("/test/key", "42");
 
   watcher_called = 0;
   {

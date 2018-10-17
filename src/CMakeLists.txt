@@ -9,7 +9,8 @@ set(SOURCES ${SRC_ROOT}/Client.cpp
 		${SRC_ROOT}/Response.cpp
 		${SRC_ROOT}/Value.cpp
 		${SRC_ROOT}/SyncClient.cpp
-		${SRC_ROOT}/Watcher.cpp)
+		${SRC_ROOT}/Watcher.cpp
+		${SRC_ROOT}/Utils.cpp)
 
 set(PROTO_SOURCES ${V3_PROTO_ROOT}/auth.pb.cc
 		${V3_PROTO_ROOT}/kv.pb.cc
@@ -47,6 +48,7 @@ install(FILES ${CLIENT_HDR_ROOT}/Client.hpp
                ${CLIENT_HDR_ROOT}/Response.hpp
                ${CLIENT_HDR_ROOT}/Value.hpp
                ${CLIENT_HDR_ROOT}/Watcher.hpp
+			   ${CLIENT_HDR_ROOT}/Utils.hpp
                DESTINATION include/etcd)
 
 install(FILES ${V3_HDR_ROOT}/action_constants.hpp

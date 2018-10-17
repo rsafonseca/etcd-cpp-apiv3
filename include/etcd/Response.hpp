@@ -42,6 +42,7 @@ namespace etcd
     }
 
     Response();
+	Response(int error_code, char const * error_message);
 
     /**
      * Returns true if this is a successful response
@@ -100,7 +101,6 @@ namespace etcd
 
   protected:  
     Response(const etcdv3::V3Response& response);
-    Response(int error_code, char const * error_message);
 
     int         _error_code;
     std::string _error_message;

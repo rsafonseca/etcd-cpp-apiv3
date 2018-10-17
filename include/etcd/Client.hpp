@@ -15,6 +15,8 @@ using etcdserverpb::KV;
 using etcdserverpb::Watch;
 using etcdserverpb::Lease;
 
+using grpc::Channel;
+
 namespace etcd
 {
   /**
@@ -29,6 +31,11 @@ namespace etcd
      * @param etcd_url is the url of the etcd server to connect to, like "http://127.0.0.1:4001"
      */
     Client(std::string const & etcd_url);
+
+	/**
+     * Returns shared pointer to client channel.
+     */
+    std::shared_ptr<Channel> channel() const;
 
     /**
      * Sends a get request to the etcd server
@@ -183,9 +190,10 @@ namespace etcd
 
   private:
 
-    std::unique_ptr<KV::Stub> stub_;
-    std::unique_ptr<Watch::Stub> watchServiceStub;
-    std::unique_ptr<Lease::Stub> leaseServiceStub;
+    const std::shared_ptr<Channel> channel_;
+	const std::unique_ptr<KV::Stub> stub_;
+    const std::unique_ptr<Watch::Stub> watchServiceStub;
+    const std::unique_ptr<Lease::Stub> leaseServiceStub;
 };
 
 

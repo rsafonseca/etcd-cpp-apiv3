@@ -39,8 +39,8 @@ namespace etcdv3
   class Action
   {
   public:
+	Action();
     Action(etcdv3::ActionParameters params);
-    Action(){};
     void waitForResponse();
   protected:
     Status status;

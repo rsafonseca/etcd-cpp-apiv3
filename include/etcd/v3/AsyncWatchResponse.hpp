@@ -16,7 +16,7 @@ namespace etcdv3
   class AsyncWatchResponse : public etcdv3::V3Response
   {
     public:
-      AsyncWatchResponse(){};
+      AsyncWatchResponse();
       void ParseResponse(WatchResponse& resp);
   };
 }

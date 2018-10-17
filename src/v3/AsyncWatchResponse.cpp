@@ -1,6 +1,10 @@
 #include <etcd/v3/AsyncWatchResponse.hpp>
 #include <etcd/v3/action_constants.hpp>
 
+
+etcdv3::AsyncWatchResponse::AsyncWatchResponse()
+{}
+
 void etcdv3::AsyncWatchResponse::ParseResponse(WatchResponse& reply)
 {
   index = reply.header().revision();

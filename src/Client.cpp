@@ -1,4 +1,5 @@
 #include <memory>
+#include <etcd/Utils.h>
 #include <etcd/Client.hpp>
 #include <etcd/v3/AsyncTxnResponse.hpp>
 #include <etcd/v3/AsyncRangeResponse.hpp>
@@ -20,22 +21,17 @@
 using grpc::Channel;
 
 
-
 etcd::Client::Client(std::string const & address)
-{
-  std::string stripped_address;
-  std::string substr("://");
-  std::string::size_type i = address.find(substr);
-  if(i != std::string::npos)
-  {
-    stripped_address = address.substr(i+substr.length());
-  }
-  std::shared_ptr<Channel> channel = grpc::CreateChannel(stripped_address, grpc::InsecureChannelCredentials());
-  stub_= KV::NewStub(channel);
-  watchServiceStub= Watch::NewStub(channel);
-  leaseServiceStub= Lease::NewStub(channel);
-}
+	: channel_(etcd::utils::createChannel(address))
+	, stub_(KV::NewStub(channel_))
+	, watchServiceStub(Watch::NewStub(channel_))
+	, leaseServiceStub(Lease::NewStub(channel_))
+{}
 
+std::shared_ptr<Channel> etcd::Client::channel() const
+{
+	return channel_;
+}
 
 pplx::task<etcd::Response> etcd::Client::get(std::string const & key)
 {
