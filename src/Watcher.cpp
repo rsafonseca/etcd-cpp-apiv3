@@ -71,6 +71,12 @@ etcd::Watcher::~Watcher()
 
 void etcd::Watcher::doWatch()
 {
+	try {
+		if (call) {
+			call->CancelWatch();
+		}
+		currentTask.wait();
+	} catch (...) {}
 	call.reset(new etcdv3::AsyncWatchAction(watch_action_parameters));
 	currentTask = pplx::task<void>([this]()
 	{

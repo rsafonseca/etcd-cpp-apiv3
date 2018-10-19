@@ -12,36 +12,36 @@ etcdv3::AsyncWatchAction::AsyncWatchAction(etcdv3::ActionParameters param)
   , isCancelled(false)
   , stream(parameters.watch_stub->AsyncWatch(&context, &cq_, (void*)"create"))
 {
-  WatchRequest watch_req;
-  WatchCreateRequest watch_create_req;
-  watch_create_req.set_key(parameters.key);
-  watch_create_req.set_prev_kv(true);
-  watch_create_req.set_start_revision(parameters.revision);
+	WatchRequest watch_req;
+	WatchCreateRequest watch_create_req;
+	watch_create_req.set_key(parameters.key);
+	watch_create_req.set_prev_kv(true);
+	watch_create_req.set_start_revision(parameters.revision);
+	watch_create_req.set_progress_notify(true);
 
-  if(parameters.withPrefix)
-  {
-    std::string range_end(parameters.key); 
-    int ascii = (int)range_end[range_end.length()-1];
-    range_end.back() = ascii+1;
-    watch_create_req.set_range_end(range_end);
-  }
+	if(parameters.withPrefix)
+	{
+	  std::string range_end(parameters.key);
+	  int ascii = (int)range_end[range_end.length()-1];
+	  range_end.back() = ascii+1;
+	  watch_create_req.set_range_end(range_end);
+	}
 
-  watch_req.mutable_create_request()->CopyFrom(watch_create_req);
+	watch_req.mutable_create_request()->CopyFrom(watch_create_req);
 
-  void* got_tag;
-  bool ok = false;
-  if (cq_.Next(&got_tag, &ok) && ok && got_tag == (void*)"create") {
-     stream->Write(watch_req, (void*)"write");
-     ok = false;
-	 if (cq_.Next(&got_tag, &ok) && ok && got_tag == (void*)"write") {
-        stream->Read(&reply, (void*)this);
-	 } else {
-		 cq_.Shutdown();
-	 }
-  } else {
-	  cq_.Shutdown();
-  }
-
+	void* got_tag;
+	bool ok = false;
+	if (cq_.Next(&got_tag, &ok) && ok && got_tag == (void*)"create") {
+	   stream->Write(watch_req, (void*)"write");
+	   ok = false;
+	   if (cq_.Next(&got_tag, &ok) && ok && got_tag == (void*)"write") {
+		  stream->Read(&reply, (void*)this);
+	   } else {
+		   cq_.Shutdown();
+	   }
+	} else {
+		cq_.Shutdown();
+	}
 }
 
 void etcdv3::AsyncWatchAction::waitForResponse() 
