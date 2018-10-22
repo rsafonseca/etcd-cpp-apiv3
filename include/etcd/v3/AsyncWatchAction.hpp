@@ -21,10 +21,10 @@ namespace etcdv3
       AsyncWatchAction(etcdv3::ActionParameters param);
       AsyncWatchResponse ParseResponse();
       void waitForResponse();
-      void waitForResponse(std::function<void(etcd::Response)> callback);
-      void CancelWatch();
+      void waitForResponse(std::function<void(etcd::Response)> const & callback);
+      void cancelWatch();
     private:
-      WatchResponse reply;
+      WatchResponse response;
 	  bool isCancelled;
       std::unique_ptr<ClientAsyncReaderWriter<WatchRequest,WatchResponse>> stream;   
   };

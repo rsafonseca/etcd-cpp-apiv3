@@ -5,7 +5,7 @@
 using etcdserverpb::Compare;
 
 etcdv3::AsyncSetAction::AsyncSetAction(etcdv3::ActionParameters param, bool create)
-  : etcdv3::Action(param) 
+  : etcdv3::Action(std::move(param))
 {
   etcdv3::Transaction transaction(parameters.key);
   isCreate = create;

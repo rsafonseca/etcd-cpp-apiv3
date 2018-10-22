@@ -55,7 +55,7 @@ void etcd::Watcher::Cancel()
 		return;
 	}
 	if (call) {
-		call->CancelWatch();
+		call->cancelWatch();
 		currentTask.wait();
 		call.reset();
 	}
@@ -78,7 +78,7 @@ void etcd::Watcher::doWatch()
 {
 	try {
 		if (call) {
-			call->CancelWatch();
+			call->cancelWatch();
 		}
 		currentTask.wait();
 	} catch (...) {}

@@ -25,16 +25,16 @@ namespace etcd
   {
   public:
 
-    template<typename T> static pplx::task<etcd::Response> create(
-		std::shared_ptr<T> call,
-		const pplx::task_options & task_options)
-    {
-      return pplx::task<etcd::Response>([call]()
-      {  
-        call->waitForResponse();  
-        return etcd::Response(call->ParseResponse());
-      }, task_options);
-    }
+	  template<typename T> static pplx::task<etcd::Response> create(
+		  std::shared_ptr<T> call,
+		  const pplx::task_options & task_options)
+	  {
+		  return pplx::task<etcd::Response>([call]()
+		  {
+			  call->waitForResponse();
+			  return etcd::Response(call->ParseResponse());
+		  }, task_options);
+	  }
 
     Response();
 	Response(int error_code, char const * error_message);

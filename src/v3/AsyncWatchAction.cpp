@@ -8,7 +8,7 @@ using etcdserverpb::WatchCreateRequest;
 
 
 etcdv3::AsyncWatchAction::AsyncWatchAction(etcdv3::ActionParameters param)
-  : etcdv3::Action(param)
+  : etcdv3::Action(std::move(param))
   , isCancelled(false)
   , stream(parameters.watch_stub->AsyncWatch(&context, &cq_, (void*)"create"))
 {
@@ -35,7 +35,7 @@ etcdv3::AsyncWatchAction::AsyncWatchAction(etcdv3::ActionParameters param)
 	   stream->Write(watch_req, (void*)"write");
 	   ok = false;
 	   if (cq_.Next(&got_tag, &ok) && ok && got_tag == (void*)"write") {
-		  stream->Read(&reply, (void*)this);
+		  stream->Read(&response, (void*)this);
 	   } else {
 		   cq_.Shutdown();
 	   }
@@ -58,16 +58,16 @@ void etcdv3::AsyncWatchAction::waitForResponse()
 	}
 
 	// ok and got tag is for read
-	if(reply.events_size()) {
+	if(response.events_size()) {
 		stream->WritesDone((void*)"writes done");
 	}
 	else {
-		stream->Read(&reply, (void*)this);
+		stream->Read(&response, (void*)this);
 	}
   }
 }
 
-void etcdv3::AsyncWatchAction::CancelWatch()
+void etcdv3::AsyncWatchAction::cancelWatch()
 {
   if(!isCancelled)
   {
@@ -85,9 +85,9 @@ void etcdv3::AsyncWatchAction::CancelWatch()
   }
 }
 
-void etcdv3::AsyncWatchAction::waitForResponse(std::function<void(etcd::Response)> callback)
+void etcdv3::AsyncWatchAction::waitForResponse(std::function<void(etcd::Response)> const & callback)
 {
-	void* got_tag;
+	void * got_tag;
 	bool ok = false;
 
 	while(cq_.Next(&got_tag, &ok)) {
@@ -99,11 +99,11 @@ void etcdv3::AsyncWatchAction::waitForResponse(std::function<void(etcd::Response
 
 		// if ok and read done, call callback and just read again
 		// call callback only if reply has events
-		if(reply.events_size()) {
+		if(response.events_size()) {
 			// callback is responsible for errors handling
 			callback(ParseResponse());
 		}
-		stream->Read(&reply, (void*)this);
+		stream->Read(&response, (void *)this);
 	}
 }
 
@@ -118,7 +118,7 @@ etcdv3::AsyncWatchResponse etcdv3::AsyncWatchAction::ParseResponse()
   }
   else
   { 
-    watch_resp.ParseResponse(reply);
+    watch_resp.ParseResponse(response);
   }
   return watch_resp;
 }
