@@ -17,7 +17,7 @@ etcdv3::AsyncWatchAction::AsyncWatchAction(etcdv3::ActionParameters param)
 	watch_create_req.set_key(parameters.key);
 	watch_create_req.set_prev_kv(true);
 	watch_create_req.set_start_revision(parameters.revision);
-	watch_create_req.set_progress_notify(true);
+	//watch_create_req.set_progress_notify(true);
 
 	if(parameters.withPrefix)
 	{

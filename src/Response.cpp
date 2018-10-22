@@ -12,7 +12,7 @@ etcd::Response::Response(const etcdv3::V3Response& reply)
   if(reply.has_values())
   {
     auto val = reply.get_values();
-    for(unsigned int index = 0; index < val.size(); index++)
+    for(size_t index = 0; index < val.size(); index++)
     {
       _values.push_back(Value(val[index]));
       _keys.push_back(val[index].kvs.key());

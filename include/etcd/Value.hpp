@@ -1,7 +1,8 @@
 #ifndef __ETCD_VECTOR_HPP__
 #define __ETCD_VECTOR_HPP__
 
-#include <cpprest/http_client.h>
+#include <pplx/pplxtasks.h>
+
 #include <string>
 #include <vector>
 #include <etcd/v3/KeyValue.hpp>
@@ -53,8 +54,8 @@ namespace etcd
     friend class DeleteRpcResponse;
     friend class AsyncDeleteResponse;
     Value();
-    Value(web::json::value const & json_value);
     Value(etcdv3::KeyValue const & kvs);
+	// TODO: maybe add Value constructor from json to work with JSON responses
     std::string _key;
     bool        dir;
     std::string value;

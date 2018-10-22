@@ -19,23 +19,27 @@ public:
 	Watcher(
 		const std::string & address,
 		const std::string & key,
-		std::function<void(Response)> callback);
+		std::function<void(Response)> callback,
+		const pplx::task_options & task_options = pplx::task_options());
 	Watcher(
 		const std::shared_ptr<grpc::Channel> & channel,
 		const std::string & key,
-		std::function<void(Response)> callback);
+		std::function<void(Response)> callback,
+		const pplx::task_options & task_options = pplx::task_options());
 	Watcher(
 		const std::string & address,
 		const std::string & key,
 		const bool recursive,
 		const int fromIndex,
-		std::function<void(Response)> callback);
+		std::function<void(Response)> callback,
+		const pplx::task_options & task_options = pplx::task_options());
 	Watcher(
 		const std::shared_ptr<Channel> & channel,
 		const std::string & key,
 		const bool recursive,
 		const int fromIndex,
-		std::function<void(Response)> callback);
+		std::function<void(Response)> callback,
+		const pplx::task_options & task_options = pplx::task_options());
 	void Cancel();
 	bool Cancelled() const;
 	~Watcher();
@@ -45,6 +49,7 @@ protected:
 
 	const std::shared_ptr<Channel> channel;
 	const std::unique_ptr<Watch::Stub> watchServiceStub;
+	const pplx::task_options task_options;
 	etcdv3::ActionParameters watch_action_parameters;
 	std::function<void(Response)> callback;
 	bool isCancelled;

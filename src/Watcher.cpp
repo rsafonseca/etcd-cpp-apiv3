@@ -6,15 +6,17 @@
 etcd::Watcher::Watcher(
 	const std::string & address,
 	const std::string & key,
-	std::function<void(Response)> callback)
-	: Watcher::Watcher(etcd::utils::createChannel(address), key, true, 0, callback)
+	std::function<void(Response)> callback,
+	const pplx::task_options & task_options)
+	: Watcher::Watcher(etcd::utils::createChannel(address), key, true, 0, callback, task_options)
 {}
 
 etcd::Watcher::Watcher(
 	const std::shared_ptr<grpc::Channel> & channel,
 	const std::string & key,
-	std::function<void(Response)> callback)
-	: Watcher::Watcher(channel, key, true, 0, callback)
+	std::function<void(Response)> callback,
+	const pplx::task_options & task_options)
+	: Watcher::Watcher(channel, key, true, 0, callback, task_options)
 {}
 
 etcd::Watcher::Watcher(
@@ -22,8 +24,9 @@ etcd::Watcher::Watcher(
 	const std::string & key,
 	const bool recursive,
 	const int fromIndex,
-	std::function<void(Response)> callback)
-	: Watcher::Watcher(etcd::utils::createChannel(address), key, recursive, fromIndex, callback)
+	std::function<void(Response)> callback,
+	const pplx::task_options & task_options)
+	: Watcher::Watcher(etcd::utils::createChannel(address), key, recursive, fromIndex, callback, task_options)
 {}
 
 etcd::Watcher::Watcher(
@@ -31,9 +34,11 @@ etcd::Watcher::Watcher(
 	const std::string & key,
 	const bool recursive,
 	const int fromIndex,
-	std::function<void(Response)> callback)
+	std::function<void(Response)> callback,
+	const pplx::task_options & task_options)
 	: channel(channel)
 	, watchServiceStub(Watch::NewStub(channel))
+	, task_options(task_options)
 	, callback(callback)
 	, isCancelled(false)
 {
@@ -81,5 +86,5 @@ void etcd::Watcher::doWatch()
 	currentTask = pplx::task<void>([this]()
 	{
 		call->waitForResponse(callback);
-	});
+	}, task_options);
 }

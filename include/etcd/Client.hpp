@@ -29,8 +29,9 @@ namespace etcd
     /**
      * Constructs an etcd client object.
      * @param etcd_url is the url of the etcd server to connect to, like "http://127.0.0.1:4001"
+     * @param task_options is the cpprest tasks options (needed for async tasks runtime settings handling)
      */
-    Client(std::string const & etcd_url);
+    Client(std::string const & etcd_url, const pplx::task_options & task_options = pplx::task_options());
 
 	/**
      * Returns shared pointer to client channel.
@@ -194,6 +195,7 @@ namespace etcd
 	const std::unique_ptr<KV::Stub> stub_;
     const std::unique_ptr<Watch::Stub> watchServiceStub;
     const std::unique_ptr<Lease::Stub> leaseServiceStub;
+	const pplx::task_options task_options;
 };
 
 

@@ -21,11 +21,12 @@
 using grpc::Channel;
 
 
-etcd::Client::Client(std::string const & address)
+etcd::Client::Client(std::string const & address, const pplx::task_options & task_options)
 	: channel_(etcd::utils::createChannel(address))
 	, stub_(KV::NewStub(channel_))
 	, watchServiceStub(Watch::NewStub(channel_))
 	, leaseServiceStub(Lease::NewStub(channel_))
+	, task_options(task_options)
 {}
 
 std::shared_ptr<Channel> etcd::Client::channel() const
@@ -40,7 +41,7 @@ pplx::task<etcd::Response> etcd::Client::get(std::string const & key)
   params.withPrefix = false;
   params.kv_stub = stub_.get();
   std::shared_ptr<etcdv3::AsyncGetAction> call(new etcdv3::AsyncGetAction(params));
-  return Response::create(call);
+  return Response::create(call, task_options);
 }
 
 pplx::task<etcd::Response> etcd::Client::set(std::string const & key, std::string const & value, int ttl)
@@ -58,7 +59,7 @@ pplx::task<etcd::Response> etcd::Client::set(std::string const & key, std::strin
       return pplx::task<etcd::Response>([res]()
       {
         return etcd::Response(res.error_code(), res.error_message().c_str());    
-      });
+      }, task_options);
     }
     else
     {
@@ -67,7 +68,7 @@ pplx::task<etcd::Response> etcd::Client::set(std::string const & key, std::strin
   }
 
   std::shared_ptr<etcdv3::AsyncSetAction> call(new etcdv3::AsyncSetAction(params));
-  return Response::create(call);
+  return Response::create(call, task_options);
 }
 
 pplx::task<etcd::Response> etcd::Client::set(std::string const & key, std::string const & value, int64_t leaseid)
@@ -78,7 +79,7 @@ pplx::task<etcd::Response> etcd::Client::set(std::string const & key, std::strin
   params.lease_id = leaseid;
   params.kv_stub = stub_.get();
   std::shared_ptr<etcdv3::AsyncSetAction> call(new etcdv3::AsyncSetAction(params));
-  return Response::create(call);
+  return Response::create(call, task_options);
 }
 
 
@@ -97,7 +98,7 @@ pplx::task<etcd::Response> etcd::Client::add(std::string const & key, std::strin
       return pplx::task<etcd::Response>([res]()
       {
         return etcd::Response(res.error_code(), res.error_message().c_str());    
-      });
+      }, task_options);
     }
     else
     {
@@ -105,7 +106,7 @@ pplx::task<etcd::Response> etcd::Client::add(std::string const & key, std::strin
     }
   }
   std::shared_ptr<etcdv3::AsyncSetAction> call(new etcdv3::AsyncSetAction(params,true));
-  return Response::create(call);
+  return Response::create(call, task_options);
 }
 
 pplx::task<etcd::Response> etcd::Client::add(std::string const & key, std::string const & value, int64_t leaseid)
@@ -116,7 +117,7 @@ pplx::task<etcd::Response> etcd::Client::add(std::string const & key, std::strin
   params.lease_id = leaseid;
   params.kv_stub = stub_.get();
   std::shared_ptr<etcdv3::AsyncSetAction> call(new etcdv3::AsyncSetAction(params,true));
-  return Response::create(call);
+  return Response::create(call, task_options);
 }
 
 
@@ -135,7 +136,7 @@ pplx::task<etcd::Response> etcd::Client::modify(std::string const & key, std::st
       return pplx::task<etcd::Response>([res]()
       {
         return etcd::Response(res.error_code(), res.error_message().c_str());    
-      });
+      }, task_options);
     }
     else
     {
@@ -143,7 +144,7 @@ pplx::task<etcd::Response> etcd::Client::modify(std::string const & key, std::st
     }
   }
   std::shared_ptr<etcdv3::AsyncUpdateAction> call(new etcdv3::AsyncUpdateAction(params));
-  return Response::create(call);
+  return Response::create(call, task_options);
 }
 
 pplx::task<etcd::Response> etcd::Client::modify(std::string const & key, std::string const & value, int64_t leaseid)
@@ -154,7 +155,7 @@ pplx::task<etcd::Response> etcd::Client::modify(std::string const & key, std::st
   params.lease_id = leaseid;
   params.kv_stub = stub_.get();
   std::shared_ptr<etcdv3::AsyncUpdateAction> call(new etcdv3::AsyncUpdateAction(params));
-  return Response::create(call);
+  return Response::create(call, task_options);
 }
 
 
@@ -174,7 +175,7 @@ pplx::task<etcd::Response> etcd::Client::modify_if(std::string const & key, std:
       return pplx::task<etcd::Response>([res]()
       {
         return etcd::Response(res.error_code(), res.error_message().c_str());    
-      });
+      }, task_options);
     }
     else
     {
@@ -182,7 +183,7 @@ pplx::task<etcd::Response> etcd::Client::modify_if(std::string const & key, std:
     }
   }
   std::shared_ptr<etcdv3::AsyncCompareAndSwapAction> call(new etcdv3::AsyncCompareAndSwapAction(params,etcdv3::Atomicity_Type::PREV_VALUE));
-  return Response::create(call);
+  return Response::create(call, task_options);
 }
 
 pplx::task<etcd::Response> etcd::Client::modify_if(std::string const & key, std::string const & value, std::string const & old_value, int64_t leaseid)
@@ -194,7 +195,7 @@ pplx::task<etcd::Response> etcd::Client::modify_if(std::string const & key, std:
   params.lease_id = leaseid;
   params.kv_stub = stub_.get();
   std::shared_ptr<etcdv3::AsyncCompareAndSwapAction> call(new etcdv3::AsyncCompareAndSwapAction(params,etcdv3::Atomicity_Type::PREV_VALUE));
-  return Response::create(call);
+  return Response::create(call, task_options);
 }
 
 
@@ -214,7 +215,7 @@ pplx::task<etcd::Response> etcd::Client::modify_if(std::string const & key, std:
       return pplx::task<etcd::Response>([res]()
       {
         return etcd::Response(res.error_code(), res.error_message().c_str());    
-      });
+      }, task_options);
     }
     else
     {
@@ -222,7 +223,7 @@ pplx::task<etcd::Response> etcd::Client::modify_if(std::string const & key, std:
     }
   }
   std::shared_ptr<etcdv3::AsyncCompareAndSwapAction> call(new etcdv3::AsyncCompareAndSwapAction(params,etcdv3::Atomicity_Type::PREV_INDEX));
-  return Response::create(call);
+  return Response::create(call, task_options);
 }
 
 pplx::task<etcd::Response> etcd::Client::modify_if(std::string const & key, std::string const & value, int old_index, int64_t leaseid)
@@ -234,7 +235,7 @@ pplx::task<etcd::Response> etcd::Client::modify_if(std::string const & key, std:
   params.old_revision = old_index;
   params.kv_stub = stub_.get();
   std::shared_ptr<etcdv3::AsyncCompareAndSwapAction> call(new etcdv3::AsyncCompareAndSwapAction(params,etcdv3::Atomicity_Type::PREV_INDEX));
-  return Response::create(call);
+  return Response::create(call, task_options);
 }
 
 
@@ -245,7 +246,7 @@ pplx::task<etcd::Response> etcd::Client::rm(std::string const & key)
   params.withPrefix = false;
   params.kv_stub = stub_.get();
   std::shared_ptr<etcdv3::AsyncDeleteAction> call(new etcdv3::AsyncDeleteAction(params));
-  return Response::create(call);
+  return Response::create(call, task_options);
 }
 
 
@@ -256,7 +257,7 @@ pplx::task<etcd::Response> etcd::Client::rm_if(std::string const & key, std::str
   params.old_value.assign(old_value);
   params.kv_stub = stub_.get();
   std::shared_ptr<etcdv3::AsyncCompareAndDeleteAction> call(new etcdv3::AsyncCompareAndDeleteAction(params,etcdv3::Atomicity_Type::PREV_VALUE));
-  return Response::create(call);
+  return Response::create(call, task_options);
 }
 
 pplx::task<etcd::Response> etcd::Client::rm_if(std::string const & key, int old_index)
@@ -266,7 +267,7 @@ pplx::task<etcd::Response> etcd::Client::rm_if(std::string const & key, int old_
   params.old_revision = old_index;
   params.kv_stub = stub_.get();
   std::shared_ptr<etcdv3::AsyncCompareAndDeleteAction> call(new etcdv3::AsyncCompareAndDeleteAction(params, etcdv3::Atomicity_Type::PREV_INDEX));;
-  return Response::create(call);
+  return Response::create(call, task_options);
 
 }
 
@@ -277,7 +278,7 @@ pplx::task<etcd::Response> etcd::Client::rmdir(std::string const & key, bool rec
   params.withPrefix = recursive;
   params.kv_stub = stub_.get();
   std::shared_ptr<etcdv3::AsyncDeleteAction> call(new etcdv3::AsyncDeleteAction(params));
-  return Response::create(call);
+  return Response::create(call, task_options);
 }
 
 pplx::task<etcd::Response> etcd::Client::ls(std::string const & key)
@@ -287,7 +288,7 @@ pplx::task<etcd::Response> etcd::Client::ls(std::string const & key)
   params.withPrefix = true;
   params.kv_stub = stub_.get();
   std::shared_ptr<etcdv3::AsyncGetAction> call(new etcdv3::AsyncGetAction(params));
-  return Response::create(call);
+  return Response::create(call, task_options);
 }
 
 pplx::task<etcd::Response> etcd::Client::watch(std::string const & key, bool recursive)
@@ -297,7 +298,7 @@ pplx::task<etcd::Response> etcd::Client::watch(std::string const & key, bool rec
   params.withPrefix = recursive;
   params.watch_stub = watchServiceStub.get();
   std::shared_ptr<etcdv3::AsyncWatchAction> call(new etcdv3::AsyncWatchAction(params));
-  return Response::create(call);
+  return Response::create(call, task_options);
 }
 
 pplx::task<etcd::Response> etcd::Client::watch(std::string const & key, int fromIndex, bool recursive)
@@ -308,7 +309,7 @@ pplx::task<etcd::Response> etcd::Client::watch(std::string const & key, int from
   params.revision = fromIndex;
   params.watch_stub = watchServiceStub.get();
   std::shared_ptr<etcdv3::AsyncWatchAction> call(new etcdv3::AsyncWatchAction(params));
-  return Response::create(call);
+  return Response::create(call, task_options);
 }
 
 pplx::task<etcd::Response> etcd::Client::leasegrant(int ttl)
@@ -317,7 +318,7 @@ pplx::task<etcd::Response> etcd::Client::leasegrant(int ttl)
   params.ttl = ttl;
   params.lease_stub = leaseServiceStub.get();
   std::shared_ptr<etcdv3::AsyncLeaseGrantAction> call(new etcdv3::AsyncLeaseGrantAction(params));
-  return Response::create(call);
+  return Response::create(call, task_options);
 }
 
 
