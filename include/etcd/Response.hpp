@@ -5,14 +5,8 @@
 #include <vector>
 
 #include <etcd/Value.hpp>
-#include <grpc++/grpc++.h>
-
 #include <etcd/v3/V3Response.hpp>
 
-#include <iostream>
-namespace etcdv3 {
-  class AsyncWatchAction;
-}
 
 namespace etcd
 {
@@ -36,8 +30,9 @@ namespace etcd
 		  }, task_options);
 	  }
 
-    Response();
-	Response(int error_code, char const * error_message);
+    Response() = default;
+	Response(int const error_code, const char * const error_message);
+	Response(etcdv3::V3Response && response);
 
     /**
      * Returns true if this is a successful response
@@ -60,9 +55,9 @@ namespace etcd
     std::string const & action() const;
 
     /**
-     * Returns the current index value of etcd
+     * Returns the current revision of etcd key-value store
      */
-    int index() const;
+    int64_t revision() const;
 
     /**
      * Returns the value object of the response to a get/set/modify operation.
@@ -77,7 +72,7 @@ namespace etcd
     /**
      * Returns the index-th value of the response to an 'ls' operation. Equivalent to values()[index]
      */
-    Value const & value(int index) const;
+    Value const & value(size_t const index) const;
 
     /**
      * Returns the vector of values in a directory in response to an 'ls' operation.
@@ -92,22 +87,17 @@ namespace etcd
     /**
      * Returns the index-th key in a directory listing. Same as keys()[index]
      */
-    std::string const & key(int index) const;
+    std::string const & key(size_t const index) const;
 
-  protected:  
-    Response(const etcdv3::V3Response& response);
-
-    int         _error_code;
+  private:
+    int         _error_code = 0;
     std::string _error_message;
-    int         _index;
+    int64_t     _revision = 0;
     std::string _action;
     Value       _value;
     Value       _prev_value;
     Values      _values;
     Keys        _keys;
-    friend class SyncClient;
-    friend class etcdv3::AsyncWatchAction;
-    friend class Client;
   };
 }
 

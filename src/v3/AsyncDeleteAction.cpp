@@ -9,7 +9,7 @@ etcdv3::AsyncDeleteAction::AsyncDeleteAction(ActionParameters param)
   DeleteRangeRequest del_request;
   del_request.set_key(parameters.key);
   del_request.set_prev_kv(true);
-  std::string range_end(parameters.key); 
+  std::string range_end(parameters.key);
   if(parameters.withPrefix)
   {
     int ascii = (int)range_end[range_end.length()-1];
@@ -22,18 +22,11 @@ etcdv3::AsyncDeleteAction::AsyncDeleteAction(ActionParameters param)
 }
 
 etcdv3::AsyncDeleteRangeResponse etcdv3::AsyncDeleteAction::ParseResponse()
-{
-  AsyncDeleteRangeResponse del_resp;
-  
-  if(!status.ok())
+{ 
+  if (!status.ok())
   {
-    del_resp.set_error_code(status.error_code());
-    del_resp.set_error_message(status.error_message());
+    return AsyncDeleteRangeResponse(status.error_code(), status.error_message());
   }
-  else
-  { 
-    del_resp.ParseResponse(parameters.key, parameters.withPrefix, reply); 
-  }
-    
-  return del_resp;
+
+  return AsyncDeleteRangeResponse(reply, parameters.withPrefix);
 }

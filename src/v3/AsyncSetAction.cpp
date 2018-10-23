@@ -4,13 +4,13 @@
 
 using etcdserverpb::Compare;
 
-etcdv3::AsyncSetAction::AsyncSetAction(etcdv3::ActionParameters param, bool create)
+etcdv3::AsyncSetAction::AsyncSetAction(etcdv3::ActionParameters param, bool const create)
   : etcdv3::Action(std::move(param))
+  , isCreate(create)
 {
   etcdv3::Transaction transaction(parameters.key);
-  isCreate = create;
   transaction.init_compare(Compare::CompareResult::Compare_CompareResult_EQUAL,
-		  	  	  	  	  	  Compare::CompareTarget::Compare_CompareTarget_VERSION);
+                           Compare::CompareTarget::Compare_CompareTarget_VERSION);
 
   transaction.setup_basic_create_sequence(parameters.key, parameters.value, parameters.lease_id);
 
@@ -28,25 +28,18 @@ etcdv3::AsyncSetAction::AsyncSetAction(etcdv3::ActionParameters param, bool crea
 
 etcdv3::AsyncTxnResponse etcdv3::AsyncSetAction::ParseResponse()
 {
-
-  AsyncTxnResponse txn_resp;
-  
-  if(!status.ok())
+  if (!status.ok())
   {
-    txn_resp.set_error_code(status.error_code());
-    txn_resp.set_error_message(status.error_message());
+    return AsyncTxnResponse(status.error_code(), status.error_message());
   }
-  else
-  { 
-    txn_resp.ParseResponse(parameters.key, parameters.withPrefix, reply);
-    std::string action = isCreate? etcdv3::CREATE_ACTION:etcdv3::SET_ACTION;
-    txn_resp.set_action(action);
 
-    if(!reply.succeeded() && action == etcdv3::CREATE_ACTION)
-    {
-      txn_resp.set_error_code(105);
-      txn_resp.set_error_message("Key already exists");
-    } 
+  auto txn_resp = AsyncTxnResponse(reply, parameters.withPrefix, isCreate ? etcdv3::CREATE_ACTION : etcdv3::SET_ACTION);
+
+  if (!reply.succeeded() && isCreate)
+  {
+    txn_resp.error_code = 105;
+    txn_resp.error_message = "Key already exists";
   }
+
   return txn_resp;
 }

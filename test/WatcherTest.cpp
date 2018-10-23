@@ -1,5 +1,7 @@
 #include <catch.hpp>
 
+#include <unistd.h>
+
 #include <etcd/Watcher.hpp>
 #include <etcd/SyncClient.hpp>
 

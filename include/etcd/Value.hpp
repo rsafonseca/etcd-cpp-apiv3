@@ -1,10 +1,11 @@
 #ifndef __ETCD_VECTOR_HPP__
 #define __ETCD_VECTOR_HPP__
 
-#include <pplx/pplxtasks.h>
-
 #include <string>
 #include <vector>
+
+#include <pplx/pplxtasks.h>
+
 #include <etcd/v3/KeyValue.hpp>
 
 namespace etcd
@@ -34,12 +35,12 @@ namespace etcd
     /**
      * Returns the creation index of this value.
      */
-    int created_index() const;
+    int64_t created_revision() const;
 
     /**
      * Returns the last modification's index of this value.
      */
-    int modified_index() const;
+    int64_t modified_revision() const;
 
     /**
      * Returns the ttl of this value or 0 if ttl is not set
@@ -50,19 +51,19 @@ namespace etcd
 
   protected:
     friend class Response;
-    friend class BaseResponse; //deliberately done since Value class will be removed during full V3
+    friend class BaseResponse; // deliberately done since Value class will be removed during full V3
     friend class DeleteRpcResponse;
     friend class AsyncDeleteResponse;
-    Value();
-    Value(etcdv3::KeyValue const & kvs);
+    Value() = default;
+    Value(etcdv3::KeyValue && kvs);
 	// TODO: maybe add Value constructor from json to work with JSON responses
     std::string _key;
-    bool        dir;
-    std::string value;
-    int         created;
-    int         modified;
-    int         _ttl;
-    int64_t     leaseId;
+    bool        _dir = false;
+    std::string _value;
+    int64_t     _created = 0;
+    int64_t     _modified = 0;
+    int         _ttl = 0;
+    int64_t     _lease_id = 0;
   };
 
   typedef std::vector<Value> Values;

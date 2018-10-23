@@ -13,8 +13,8 @@ namespace etcdv3
   class AsyncLeaseGrantResponse : public etcdv3::V3Response
   {
     public:
-      AsyncLeaseGrantResponse(){};
-      void ParseResponse(LeaseGrantResponse& resp);
+      using V3Response::V3Response;
+      AsyncLeaseGrantResponse(LeaseGrantResponse const & resp);
   };
 }
 

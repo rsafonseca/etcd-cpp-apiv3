@@ -9,6 +9,7 @@ set(TEST_SOURCES ${TST_ROOT}/EtcdTest.cpp
 		${TST_ROOT}/WatcherTest.cpp)
 
 add_executable(${PROJECT_NAME} ${TEST_SOURCES})
+#add_executable(${PROJECT_NAME} ${TST_ROOT}/wrapper_test.cpp)
 
 target_link_libraries(${PROJECT_NAME} etcd-cpp-api)
 

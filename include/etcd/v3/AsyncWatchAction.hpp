@@ -25,8 +25,8 @@ namespace etcdv3
       void cancelWatch();
     private:
       WatchResponse response;
-	  bool isCancelled;
-      std::unique_ptr<ClientAsyncReaderWriter<WatchRequest,WatchResponse>> stream;   
+      bool isCancelled;
+      std::unique_ptr<ClientAsyncReaderWriter<WatchRequest,WatchResponse>> stream;
   };
 }
 

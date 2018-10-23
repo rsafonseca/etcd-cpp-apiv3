@@ -2,37 +2,33 @@
 #include <etcd/v3/action_constants.hpp>
 
 
-etcdv3::AsyncWatchResponse::AsyncWatchResponse()
-{}
-
-void etcdv3::AsyncWatchResponse::ParseResponse(WatchResponse& reply)
+etcdv3::AsyncWatchResponse::AsyncWatchResponse(WatchResponse const & reply)
 {
-  index = reply.header().revision();
-  for(int cnt =0; cnt < reply.events_size(); cnt++)
+  revision = reply.header().revision();
+  for (int cnt = 0; cnt < reply.events_size(); cnt++)
   {
     auto event = reply.events(cnt);
-    if(mvccpb::Event::EventType::Event_EventType_PUT == event.type())
-    {
-      if(event.kv().version() == 1)
-      {
-        action = etcdv3::CREATE_ACTION;
-      }
-      else
-      {
-        action = etcdv3::SET_ACTION;
-      }
-      value.kvs = event.kv();       
 
-    }
-    else if(mvccpb::Event::EventType::Event_EventType_DELETE == event.type())
+    switch (event.type())
     {
-      action = etcdv3::DELETE_ACTION;
-      value.kvs = event.kv();
-    } 
-    if(event.has_prev_kv())
-    {
-      prev_value.kvs = event.prev_kv();   
+      case mvccpb::Event::EventType::Event_EventType_PUT:
+        action = (event.kv().version() == 1) ? etcdv3::CREATE_ACTION : etcdv3::SET_ACTION;
+        value.kvs.CopyFrom(event.kv());
+        break;
+      case mvccpb::Event::EventType::Event_EventType_DELETE:
+        action = etcdv3::DELETE_ACTION;
+        value.kvs.CopyFrom(event.kv());
+        break;
+      default:
+        break;
     }
+
+    if (event.has_prev_kv())
+    {
+      prev_value.kvs.CopyFrom(event.prev_kv());
+    }
+
+    // TODO: maybe change this logic
     // just store the first occurence of the key in values.
     // this is done so tas client will not need to change their behaviour.
     // break immediately

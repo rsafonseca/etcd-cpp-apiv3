@@ -16,12 +16,12 @@ etcdv3::AsyncCompareAndSwapAction::AsyncCompareAndSwapAction(etcdv3::ActionParam
   if(type == etcdv3::Atomicity_Type::PREV_VALUE)
   {
     transaction.init_compare(parameters.old_value, Compare::CompareResult::Compare_CompareResult_EQUAL,
-		  	  	  	  	  	  	  	    Compare::CompareTarget::Compare_CompareTarget_VALUE);
+                             Compare::CompareTarget::Compare_CompareTarget_VALUE);
   }
   else if (type == etcdv3::Atomicity_Type::PREV_INDEX)
   {
     transaction.init_compare(parameters.old_revision, Compare::CompareResult::Compare_CompareResult_EQUAL,
-		  	  	  	  	  	  	  	  Compare::CompareTarget::Compare_CompareTarget_MOD);    
+                             Compare::CompareTarget::Compare_CompareTarget_MOD);
   }
 
   transaction.setup_basic_failure_operation(parameters.key);
@@ -33,26 +33,20 @@ etcdv3::AsyncCompareAndSwapAction::AsyncCompareAndSwapAction(etcdv3::ActionParam
 
 etcdv3::AsyncTxnResponse etcdv3::AsyncCompareAndSwapAction::ParseResponse()
 {
-  AsyncTxnResponse txn_resp;
-  
-  if(!status.ok())
+  if (!status.ok())
   {
-    txn_resp.set_error_code(status.error_code());
-    txn_resp.set_error_message(status.error_message());
+    return AsyncTxnResponse(status.error_code(), status.error_message());
   }
-  else
-  { 
-    txn_resp.ParseResponse(parameters.key, parameters.withPrefix, reply);
-    txn_resp.set_action(etcdv3::COMPARESWAP_ACTION);
 
-    //if there is an error code returned by parseResponse, we must 
-    //not overwrite it.
-    if(!reply.succeeded() && !txn_resp.get_error_code())
-    {
-      txn_resp.set_error_code(101);
-      txn_resp.set_error_message("Compare failed");
-    } 
+  auto txn_resp = AsyncTxnResponse(reply, parameters.withPrefix, etcdv3::COMPARESWAP_ACTION);
+
+  // if there is an error code returned by parseResponse, we must
+  // not overwrite it.
+  if (!reply.succeeded() && !txn_resp.error_code)
+  {
+    txn_resp.error_code = 101;
+    txn_resp.error_message = "Compare failed";
   }
-    
+
   return txn_resp;
 }

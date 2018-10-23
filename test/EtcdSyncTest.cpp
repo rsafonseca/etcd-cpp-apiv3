@@ -47,10 +47,10 @@ TEST_CASE("sync operations")
 
   // compare and swap
   etcd.set("/test/key1", "42");
-  int index = etcd.modify_if("/test/key1", "43", "42").index();
+  int revision = etcd.modify_if("/test/key1", "43", "42").revision();
   CHECK(101 == etcd.modify_if("/test/key1", "44", "42").error_code());
-  REQUIRE(etcd.modify_if("/test/key1", "44", index).is_ok());
-  CHECK(101 == etcd.modify_if("/test/key1", "45", index).error_code());
+  REQUIRE(etcd.modify_if("/test/key1", "44", revision).is_ok());
+  CHECK(101 == etcd.modify_if("/test/key1", "45", revision).error_code());
 
   // atomic compare-and-delete based on prevValue
   etcd.set("/test/key1", "42");
@@ -58,9 +58,9 @@ TEST_CASE("sync operations")
   CHECK(0   == etcd.rm_if("/test/key1", "42").error_code());
 
   // atomic compare-and-delete based on prevIndex
-  index = etcd.set("/test/key1", "42").index();
-  CHECK(101 == etcd.rm_if("/test/key1", index - 1).error_code());
-  CHECK(0   == etcd.rm_if("/test/key1", index).error_code());
+  revision = etcd.set("/test/key1", "42").revision();
+  CHECK(101 == etcd.rm_if("/test/key1", revision - 1).error_code());
+  CHECK(0   == etcd.rm_if("/test/key1", revision).error_code());
 
   //leasegrant
   etcd::Response res = etcd.leasegrant(60);
@@ -89,14 +89,14 @@ TEST_CASE("sync operations")
   CHECK("44" ==  res.value().as_string());
 
   res = etcd.modify_if("/test/key1", "45", "44", leaseid);
-  index = res.index();
+  revision = res.revision();
   REQUIRE(res.is_ok());
   CHECK("compareAndSwap" == res.action());
   CHECK(leaseid ==  res.value().lease());
   CHECK("45" == res.value().as_string());
 
-  res = etcd.modify_if("/test/key1", "44", index, leaseid);
-  index = res.index();
+  res = etcd.modify_if("/test/key1", "44", revision, leaseid);
+  revision = res.revision();
   REQUIRE(res.is_ok());
   CHECK("compareAndSwap" == res.action());
   CHECK(leaseid ==  res.value().lease());
@@ -142,21 +142,21 @@ TEST_CASE("sync operations")
 // {
 //   etcd::Client etcd(etcd_uri);
 
-//   int index = etcd.set("/test/key1", "42").get().index();
+//   int revision = etcd.set("/test/key1", "42").get().revision();
 
 //   etcd.set("/test/key1", "43").wait();
 //   etcd.set("/test/key1", "44").wait();
 //   etcd.set("/test/key1", "45").wait();
 
-//   etcd::Response res = etcd.watch("/test/key1", ++index).get();
+//   etcd::Response res = etcd.watch("/test/key1", ++revision).get();
 //   CHECK("set" == res.action());
 //   CHECK("43" == res.value().as_string());
 
-//   res = etcd.watch("/test/key1", ++index).get();
+//   res = etcd.watch("/test/key1", ++revision).get();
 //   CHECK("set" == res.action());
 //   CHECK("44" == res.value().as_string());
 
-//   res = etcd.watch("/test", ++index, true).get();
+//   res = etcd.watch("/test", ++revision, true).get();
 //   CHECK("set" == res.action());
 //   CHECK("45" == res.value().as_string());
 // }

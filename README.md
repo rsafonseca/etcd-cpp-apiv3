@@ -157,7 +157,7 @@ response object will give you all the details. Let's see this in an example.
 
 The Value object of the response also holds some extra information besides the string value of the
 key. You can also get the index number of the creation and the last modification of this key with
-the ```created_index()``` and the ```modofied_index()``` methods.
+the ```created_revision()``` and the ```modified_revision()``` methods.
 
 ```c++
   etcd::Client etcd("http://127.0.0.1:4001");

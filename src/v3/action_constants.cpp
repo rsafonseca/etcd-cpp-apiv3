@@ -7,4 +7,3 @@ char const * etcdv3::SET_ACTION = "set";
 char const * etcdv3::GET_ACTION = "get";
 char const * etcdv3::DELETE_ACTION = "delete";
 char const * etcdv3::COMPAREDELETE_ACTION = "compareAndDelete";
-

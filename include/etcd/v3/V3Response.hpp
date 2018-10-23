@@ -6,31 +6,23 @@
 
 namespace etcdv3
 {
-  class V3Response
+  struct V3Response
   {
-  public:
-    V3Response(): error_code(0), index(0){};
-    void set_error_code(int code);
-    int get_error_code() const;
-    std::string const & get_error_message() const;
-    void set_error_message(std::string msg);
-    void set_action(std::string action);
-    int get_index() const;
-    std::string const & get_action() const;
-    std::vector<etcdv3::KeyValue> const & get_values() const;
-    std::vector<etcdv3::KeyValue> const & get_prev_values() const;
-    etcdv3::KeyValue const & get_value() const;
-    etcdv3::KeyValue const & get_prev_value() const;
-    bool has_values() const;
-  protected:
-    int error_code;
-    int index;
-    std::string error_message;
-    std::string action;
-    etcdv3::KeyValue value;
-    etcdv3::KeyValue prev_value; 
-    std::vector<etcdv3::KeyValue> values;
-    std::vector<etcdv3::KeyValue> prev_values; 
+      int64_t revision = 0;
+      int error_code = 0;
+      std::string error_message;
+      std::string action;
+      etcdv3::KeyValue value;
+      etcdv3::KeyValue prev_value;
+      std::vector<etcdv3::KeyValue> values;
+      std::vector<etcdv3::KeyValue> prev_values;
+
+      V3Response() = default;
+      V3Response(grpc::StatusCode const error_code, grpc::string const & error_message);
+      V3Response(int const error_code, std::string error_message);
+
+      bool has_values() const;
   };
 }
+
 #endif

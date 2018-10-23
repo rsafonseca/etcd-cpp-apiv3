@@ -29,7 +29,7 @@ namespace etcd
     /**
      * Constructs an etcd client object.
      * @param etcd_url is the url of the etcd server to connect to, like "http://127.0.0.1:4001"
-     * @param task_options is the cpprest tasks options (needed for async tasks runtime settings handling)
+     * @param taskOptions is the cpprest tasks options (needed for async tasks runtime settings handling)
      */
     Client(std::string const & etcd_url, const pplx::task_options & task_options = pplx::task_options());
 
@@ -50,16 +50,16 @@ namespace etcd
      * @param key is the key to be created or modified
      * @param value is the new value to be set
      */
-    pplx::task<Response> set(std::string const & key, std::string const & value, int ttl = 0);
+    pplx::task<Response> set(std::string const & key, std::string const & value, int const ttl = 0);
 
     /**
      * Sets the value of a key. The key will be modified if already exists or created
      * if it does not exists.
      * @param key is the key to be created or modified
      * @param value is the new value to be set
-     * @param leaseId is the lease attached to the key
+     * @param lease_id is the lease attached to the key
      */
-    pplx::task<Response> set(std::string const & key, std::string const & value, int64_t leaseId);
+    pplx::task<Response> set(std::string const & key, std::string const & value, int64_t const lease_id);
 
 
     /**
@@ -67,30 +67,30 @@ namespace etcd
      * @param key is the key to be created
      * @param value is the value to be set
      */
-    pplx::task<Response> add(std::string const & key, std::string const & value, int ttl = 0);
+    pplx::task<Response> add(std::string const & key, std::string const & value, int const ttl = 0);
 
     /**
      * Creates a new key and sets it's value. Fails if the key already exists.
      * @param key is the key to be created
      * @param value is the value to be set
-     * @param leaseId is the lease attached to the key
+     * @param lease_id is the lease attached to the key
      */
-    pplx::task<Response> add(std::string const & key, std::string const & value, int64_t leaseId);
+    pplx::task<Response> add(std::string const & key, std::string const & value, int64_t const lease_id);
 
     /**
      * Modifies an existing key. Fails if the key does not exists.
      * @param key is the key to be modified
      * @param value is the new value to be set
      */
-    pplx::task<Response> modify(std::string const & key, std::string const & value, int ttl = 0);
+    pplx::task<Response> modify(std::string const & key, std::string const & value, int const ttl = 0);
 
     /**
      * Modifies an existing key. Fails if the key does not exists.
      * @param key is the key to be modified
      * @param value is the new value to be set
-     * @param leaseId is the lease attached to the key
+     * @param lease_id is the lease attached to the key
      */
-    pplx::task<Response> modify(std::string const & key, std::string const & value, int64_t leaseId);
+    pplx::task<Response> modify(std::string const & key, std::string const & value, int64_t const lease_id);
 
     /**
      * Modifies an existing key only if it has a specific value. Fails if the key does not exists
@@ -99,7 +99,7 @@ namespace etcd
      * @param value is the new value to be set
      * @param old_value is the value to be replaced
      */
-    pplx::task<Response> modify_if(std::string const & key, std::string const & value, std::string const & old_value, int ttl = 0);
+    pplx::task<Response> modify_if(std::string const & key, std::string const & value, std::string const & old_value, int const ttl = 0);
 
     /**
      * Modifies an existing key only if it has a specific value. Fails if the key does not exists
@@ -107,28 +107,28 @@ namespace etcd
      * @param key is the key to be modified
      * @param value is the new value to be set
      * @param old_value is the value to be replaced
-     * @param leaseId is the lease attached to the key
+     * @param lease_id is the lease attached to the key
      */
-    pplx::task<Response> modify_if(std::string const & key, std::string const & value, std::string const & old_value, int64_t leaseId);
+    pplx::task<Response> modify_if(std::string const & key, std::string const & value, std::string const & old_value, int64_t const lease_id);
 
     /**
      * Modifies an existing key only if it has a specific modification index value. Fails if the key
      * does not exists or the modification index of the previous value differs from the expected one.
      * @param key is the key to be modified
      * @param value is the new value to be set
-     * @param old_index is the expected index of the original value
+     * @param old_revision is the expected revision of the original value
      */
-    pplx::task<Response> modify_if(std::string const & key, std::string const & value, int old_index, int ttl = 0);
+    pplx::task<Response> modify_if(std::string const & key, std::string const & value, int64_t const old_revision, int const ttl = 0);
 
     /**
      * Modifies an existing key only if it has a specific modification index value. Fails if the key
      * does not exists or the modification index of the previous value differs from the expected one.
      * @param key is the key to be modified
      * @param value is the new value to be set
-     * @param old_index is the expected index of the original value
-     * @param leaseId is the lease attached to the key
+     * @param old_revision is the expected revision of the original value
+     * @param lease_id is the lease attached to the key
      */
-    pplx::task<Response> modify_if(std::string const & key, std::string const & value, int old_index, int64_t leaseId);
+    pplx::task<Response> modify_if(std::string const & key, std::string const & value, int64_t const old_revision, int64_t const lease_id);
 
     /**
      * Removes a single key. The key has to point to a plain, non directory entry.
@@ -140,6 +140,7 @@ namespace etcd
      * Removes a single key but only if it has a specific value. Fails if the key does not exists
      * or the its value differs from the expected one.
      * @param key is the key to be deleted
+     * @param old_value is the value old value to be compared with
      */
     pplx::task<Response> rm_if(std::string const & key, std::string const & old_value);
 
@@ -147,9 +148,9 @@ namespace etcd
      * Removes an existing key only if it has a specific modification index value. Fails if the key
      * does not exists or the modification index of it differs from the expected one.
      * @param key is the key to be deleted
-     * @param old_index is the expected index of the existing value
+     * @param old_revision is the expected revision of the existing value
      */
-    pplx::task<Response> rm_if(std::string const & key, int old_index);
+    pplx::task<Response> rm_if(std::string const & key, int64_t const old_revision);
 
     /**
      * Gets a directory listing of the directory identified by the key.
@@ -163,7 +164,7 @@ namespace etcd
      * @param key is the directory to be created to be listed
      * @param recursive if true then delete a whole subtree, otherwise deletes only an empty directory.
      */
-    pplx::task<Response> rmdir(std::string const & key, bool recursive = false);
+    pplx::task<Response> rmdir(std::string const & key, bool const recursive = false);
 
     /**
      * Watches for changes of a key or a subtree. Please note that if you watch e.g. "/testdir" and
@@ -173,29 +174,29 @@ namespace etcd
      * @param key is the value or directory to be watched
      * @param recursive if true watch a whole subtree
      */
-    pplx::task<Response> watch(std::string const & key, bool recursive = false);
+    pplx::task<Response> watch(std::string const & key, bool const recursive = false);
 
     /**
      * Watches for changes of a key or a subtree from a specific index. The index value can be in the "past".
      * @param key is the value or directory to be watched
-     * @param fromIndex the first index we are interested in
+     * @param from_revision the first revision we are interested in
      * @param recursive if true watch a whole subtree
      */
-    pplx::task<Response> watch(std::string const & key, int fromIndex, bool recursive = false);
+    pplx::task<Response> watch(std::string const & key, int64_t const from_revision, bool const recursive = false);
 
     /**
      * Grants a lease.
      * @param ttl is the time to live of the lease
      */
-    pplx::task<Response> leasegrant(int ttl);
+    pplx::task<Response> leasegrant(int const ttl);
 
   private:
 
-    const std::shared_ptr<Channel> channel_;
-	const std::unique_ptr<KV::Stub> stub_;
-    const std::unique_ptr<Watch::Stub> watchServiceStub;
-    const std::unique_ptr<Lease::Stub> leaseServiceStub;
-	const pplx::task_options task_options;
+    const std::shared_ptr<Channel> _channel;
+	const std::unique_ptr<KV::Stub> _stub;
+    const std::unique_ptr<Watch::Stub> _watch_service_stub;
+    const std::unique_ptr<Lease::Stub> _lease_service_stub;
+	const pplx::task_options _task_options;
 };
 
 

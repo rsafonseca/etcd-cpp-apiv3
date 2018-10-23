@@ -26,9 +26,9 @@ TEST_CASE("add a new key")
   CHECK("42" == val.as_string());
   CHECK("/test/key1" == val.key());
   CHECK(!val.is_dir());
-  CHECK(0 < val.created_index());
-  CHECK(0 < val.modified_index());
-  CHECK(0 < resp.index()); // X-Etcd-Index header value
+  CHECK(0 < val.created_revision());
+  CHECK(0 < val.modified_revision());
+  CHECK(0 < resp.revision()); // X-Etcd-Index header value
   CHECK(105 == etcd.add("/test/key1", "43").get().error_code()); // Key already exists
   CHECK(105 == etcd.add("/test/key1", "42").get().error_code()); // Key already exists
   CHECK("Key already exists" == etcd.add("/test/key1", "42").get().error_message());
@@ -96,7 +96,7 @@ TEST_CASE("atomic compare-and-swap")
 
   // modify success
   etcd::Response res = etcd.modify_if("/test/key1", "43", "42").get();
-  int index = res.index();
+  int revision = res.revision();
   REQUIRE(res.is_ok());
   CHECK("compareAndSwap" == res.action());
   CHECK("43" == res.value().as_string());
@@ -124,17 +124,17 @@ TEST_CASE("delete a value")
   CHECK(100 == resp.error_code());
   CHECK("Key not found" == resp.error_message());
 
-  int index = etcd.get("/test/key1").get().index();
-  int create_index = etcd.get("/test/key1").get().value().created_index();
-  int modify_index = etcd.get("/test/key1").get().value().modified_index();
+  int revision = etcd.get("/test/key1").get().revision();
+  int create_revision = etcd.get("/test/key1").get().value().created_revision();
+  int modify_revision = etcd.get("/test/key1").get().value().modified_revision();
   resp = etcd.rm("/test/key1").get();
   CHECK("43" == resp.prev_value().as_string());
   CHECK( "/test/key1" == resp.prev_value().key());
-  CHECK( create_index == resp.prev_value().created_index());
-  CHECK( modify_index == resp.prev_value().modified_index());
+  CHECK( create_revision == resp.prev_value().created_revision());
+  CHECK( modify_revision == resp.prev_value().modified_revision());
   CHECK("delete" == resp.action());
-  CHECK( modify_index == resp.value().modified_index());
-  CHECK( create_index == resp.value().created_index());
+  CHECK( modify_revision == resp.value().modified_revision());
+  CHECK( create_revision == resp.value().created_revision());
   CHECK("" == resp.value().as_string());
   CHECK( "/test/key1" == resp.value().key());
 }
@@ -158,14 +158,14 @@ TEST_CASE("atomic compare-and-delete based on prevValue")
 TEST_CASE("atomic compare-and-delete based on prevIndex")
 {
   etcd::Client etcd( z10);
-  int index = etcd.set("/test/key1", "42").get().index();
+  int revision = etcd.set("/test/key1", "42").get().revision();
 
-  etcd::Response res = etcd.rm_if("/test/key1", index - 1).get();
+  etcd::Response res = etcd.rm_if("/test/key1", revision - 1).get();
   CHECK(!res.is_ok());
   CHECK(101 == res.error_code());
   CHECK("Compare failed" == res.error_message());
 
-  res = etcd.rm_if("/test/key1", index).get();
+  res = etcd.rm_if("/test/key1", revision).get();
   REQUIRE(res.is_ok());
   CHECK("compareAndDelete" == res.action());
   CHECK("42" == res.prev_value().as_string());
@@ -179,7 +179,7 @@ TEST_CASE("deep atomic compare-and-swap")
 
   // modify success
   etcd::Response res = etcd.modify_if("/test/key1", "43", "42").get();
-  int index = res.index();
+  int revision = res.revision();
   REQUIRE(res.is_ok());
   CHECK("compareAndSwap" == res.action());
   CHECK("43" == res.value().as_string());
@@ -191,14 +191,14 @@ TEST_CASE("deep atomic compare-and-swap")
   CHECK("Compare failed" == res.error_message());
 
 
-  // succes with the correct index
-  res = etcd.modify_if("/test/key1", "44", index).get();
+  // succes with the correct revision
+  res = etcd.modify_if("/test/key1", "44", revision).get();
   REQUIRE(res.is_ok());
   CHECK("compareAndSwap" == res.action());
   CHECK("44" == res.value().as_string());
 
-  // index changes so second modify fails
-  res = etcd.modify_if("/test/key1", "45", index).get();
+  // revision changes so second modify fails
+  res = etcd.modify_if("/test/key1", "45", revision).get();
   CHECK(!res.is_ok());
   CHECK(101 == res.error_code());
   CHECK("Compare failed" == res.error_message());
@@ -256,7 +256,7 @@ TEST_CASE("delete a directory")
 
 
   resp = etcd.rmdir("/test/new_dir", true).get();
-  int index = resp.index();
+  int revision = resp.revision();
   CHECK("delete" == resp.action());
   REQUIRE(3 == resp.keys().size());
   CHECK("/test/new_dir/key1" == resp.key(0));
@@ -325,22 +325,22 @@ TEST_CASE("watch changes in the past")
 {
   etcd::Client etcd( z10);
   REQUIRE(0 == etcd.rmdir("/test", true).get().error_code());
-  int index = etcd.set("/test/key1", "42").get().index();
+  int64_t revision = etcd.set("/test/key1", "42").get().revision();
 
   etcd.set("/test/key1", "43").wait();
   etcd.set("/test/key1", "44").wait();
   etcd.set("/test/key1", "45").wait();
 
-  etcd::Response res = etcd.watch("/test/key1", ++index).get();
+  etcd::Response res = etcd.watch("/test/key1", ++revision).get();
   CHECK("set" == res.action());
   CHECK("43" == res.value().as_string());
   CHECK("42" == res.prev_value().as_string());
 
-  res = etcd.watch("/test/key1", ++index).get();
+  res = etcd.watch("/test/key1", ++revision).get();
   CHECK("set" == res.action());
   CHECK("44" == res.value().as_string());
 
-  res = etcd.watch("/test", ++index, true).get();
+  res = etcd.watch("/test", ++revision, true).get();
   CHECK("set" == res.action());
   CHECK("45" == res.value().as_string());
 }
@@ -386,7 +386,7 @@ TEST_CASE("lease grant")
   CHECK("etcdserver: requested lease not found" == res.error_message());
 
   res = etcd.modify_if("/test/key1", "45", "44", leaseid).get();
-  int index = res.index();
+  int revision = res.revision();
   REQUIRE(res.is_ok());
   CHECK("compareAndSwap" == res.action());
   CHECK("45" == res.value().as_string());
@@ -397,14 +397,14 @@ TEST_CASE("lease grant")
   REQUIRE(5  == res.error_code()); 
   CHECK("etcdserver: requested lease not found" == res.error_message());
 
-  // succes with the correct index
-  res = etcd.modify_if("/test/key1", "44", index, leaseid).get();
-  index = res.index();
+  // succes with the correct revision
+  res = etcd.modify_if("/test/key1", "44", revision, leaseid).get();
+  revision = res.revision();
   REQUIRE(res.is_ok());
   CHECK("compareAndSwap" == res.action());
   CHECK("44" == res.value().as_string());
 
-  res = etcd.modify_if("/test/key1", "44", index, leaseid+1).get();
+  res = etcd.modify_if("/test/key1", "44", revision, leaseid+1).get();
   REQUIRE(!res.is_ok());
   REQUIRE(5  == res.error_code()); 
   CHECK("etcdserver: requested lease not found" == res.error_message());

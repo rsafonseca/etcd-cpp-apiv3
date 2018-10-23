@@ -21,17 +21,17 @@
 using grpc::Channel;
 
 
-etcd::Client::Client(std::string const & address, const pplx::task_options & task_options)
-	: channel_(etcd::utils::createChannel(address))
-	, stub_(KV::NewStub(channel_))
-	, watchServiceStub(Watch::NewStub(channel_))
-	, leaseServiceStub(Lease::NewStub(channel_))
-	, task_options(task_options)
+etcd::Client::Client(std::string const & etcd_url, const pplx::task_options & task_options)
+  : _channel(etcd::utils::createChannel(etcd_url))
+  , _stub(KV::NewStub(_channel))
+  , _watch_service_stub(Watch::NewStub(_channel))
+  , _lease_service_stub(Lease::NewStub(_channel))
+  , _task_options(task_options)
 {}
 
 std::shared_ptr<Channel> etcd::Client::channel() const
 {
-	return channel_;
+  return _channel;
 }
 
 pplx::task<etcd::Response> etcd::Client::get(std::string const & key)
@@ -39,191 +39,191 @@ pplx::task<etcd::Response> etcd::Client::get(std::string const & key)
   etcdv3::ActionParameters params;
   params.key.assign(key);
   params.withPrefix = false;
-  params.kv_stub = stub_.get();
-  return Response::create(std::make_shared<etcdv3::AsyncGetAction>(std::move(params)), task_options);
+  params.kv_stub = _stub.get();
+  return Response::create(std::make_shared<etcdv3::AsyncGetAction>(std::move(params)), _task_options);
 }
 
-pplx::task<etcd::Response> etcd::Client::set(std::string const & key, std::string const & value, int ttl)
+pplx::task<etcd::Response> etcd::Client::set(std::string const & key, std::string const & value, int const ttl)
 {
   etcdv3::ActionParameters params;
   params.key.assign(key);
   params.value.assign(value);
-  params.kv_stub = stub_.get();
+  params.kv_stub = _stub.get();
 
   if(ttl > 0)
   {
     auto res = leasegrant(ttl).get();
-    if(!res.is_ok()) 
+    if(!res.is_ok())
     {
       return pplx::task<etcd::Response>([res]()
       {
-        return etcd::Response(res.error_code(), res.error_message().c_str());    
-      }, task_options);
+        return etcd::Response(res.error_code(), res.error_message().c_str());
+      }, _task_options);
     }
     else
     {
       params.lease_id = res.value().lease();
     }
   }
-  return Response::create(std::make_shared<etcdv3::AsyncSetAction>(std::move(params)), task_options);
+  return Response::create(std::make_shared<etcdv3::AsyncSetAction>(std::move(params)), _task_options);
 }
 
-pplx::task<etcd::Response> etcd::Client::set(std::string const & key, std::string const & value, int64_t leaseid)
+pplx::task<etcd::Response> etcd::Client::set(std::string const & key, std::string const & value, int64_t const lease_id)
 {
   etcdv3::ActionParameters params;
   params.key.assign(key);
   params.value.assign(value);
-  params.lease_id = leaseid;
-  params.kv_stub = stub_.get();
-  return Response::create(std::make_shared<etcdv3::AsyncSetAction>(std::move(params)), task_options);
+  params.lease_id = lease_id;
+  params.kv_stub = _stub.get();
+  return Response::create(std::make_shared<etcdv3::AsyncSetAction>(std::move(params)), _task_options);
 }
 
 
-pplx::task<etcd::Response> etcd::Client::add(std::string const & key, std::string const & value, int ttl)
+pplx::task<etcd::Response> etcd::Client::add(std::string const & key, std::string const & value, int const ttl)
 {
   etcdv3::ActionParameters params;
   params.key.assign(key);
   params.value.assign(value);
-  params.kv_stub = stub_.get();
+  params.kv_stub = _stub.get();
 
   if(ttl > 0)
   {
     auto res = leasegrant(ttl).get();
-    if(!res.is_ok()) 
+    if(!res.is_ok())
     {
       return pplx::task<etcd::Response>([res]()
       {
-        return etcd::Response(res.error_code(), res.error_message().c_str());    
-      }, task_options);
+        return etcd::Response(res.error_code(), res.error_message().c_str());
+      }, _task_options);
     }
     else
     {
       params.lease_id = res.value().lease();
     }
   }
-  return Response::create(std::make_shared<etcdv3::AsyncSetAction>(std::move(params), true), task_options);
+  return Response::create(std::make_shared<etcdv3::AsyncSetAction>(std::move(params), true), _task_options);
 }
 
-pplx::task<etcd::Response> etcd::Client::add(std::string const & key, std::string const & value, int64_t leaseid)
+pplx::task<etcd::Response> etcd::Client::add(std::string const & key, std::string const & value, int64_t const lease_id)
 {
   etcdv3::ActionParameters params;
   params.key.assign(key);
   params.value.assign(value);
-  params.lease_id = leaseid;
-  params.kv_stub = stub_.get();
-  return Response::create(std::make_shared<etcdv3::AsyncSetAction>(std::move(params), true), task_options);
+  params.lease_id = lease_id;
+  params.kv_stub = _stub.get();
+  return Response::create(std::make_shared<etcdv3::AsyncSetAction>(std::move(params), true), _task_options);
 }
 
 
-pplx::task<etcd::Response> etcd::Client::modify(std::string const & key, std::string const & value, int ttl)
+pplx::task<etcd::Response> etcd::Client::modify(std::string const & key, std::string const & value, int const ttl)
 {
   etcdv3::ActionParameters params;
   params.key.assign(key);
   params.value.assign(value);
-  params.kv_stub = stub_.get();
+  params.kv_stub = _stub.get();
 
   if(ttl > 0)
   {
     auto res = leasegrant(ttl).get();
-    if(!res.is_ok()) 
+    if(!res.is_ok())
     {
       return pplx::task<etcd::Response>([res]()
       {
-        return etcd::Response(res.error_code(), res.error_message().c_str());    
-      }, task_options);
+        return etcd::Response(res.error_code(), res.error_message().c_str());
+      }, _task_options);
     }
     else
     {
       params.lease_id = res.value().lease();
     }
   }
-  return Response::create(std::make_shared<etcdv3::AsyncUpdateAction>(std::move(params)), task_options);
+  return Response::create(std::make_shared<etcdv3::AsyncUpdateAction>(std::move(params)), _task_options);
 }
 
-pplx::task<etcd::Response> etcd::Client::modify(std::string const & key, std::string const & value, int64_t leaseid)
+pplx::task<etcd::Response> etcd::Client::modify(std::string const & key, std::string const & value, int64_t const lease_id)
 {
   etcdv3::ActionParameters params;
   params.key.assign(key);
   params.value.assign(value);
-  params.lease_id = leaseid;
-  params.kv_stub = stub_.get();
-  return Response::create(std::make_shared<etcdv3::AsyncUpdateAction>(std::move(params)), task_options);
+  params.lease_id = lease_id;
+  params.kv_stub = _stub.get();
+  return Response::create(std::make_shared<etcdv3::AsyncUpdateAction>(std::move(params)), _task_options);
 }
 
 
-pplx::task<etcd::Response> etcd::Client::modify_if(std::string const & key, std::string const & value, std::string const & old_value, int ttl)
+pplx::task<etcd::Response> etcd::Client::modify_if(std::string const & key, std::string const & value, std::string const & old_value, int const ttl)
 {
   etcdv3::ActionParameters params;
   params.key.assign(key);
   params.value.assign(value);
   params.old_value.assign(old_value);
-  params.kv_stub = stub_.get();
+  params.kv_stub = _stub.get();
 
   if(ttl > 0)
   {
     auto res = leasegrant(ttl).get();
-    if(!res.is_ok()) 
+    if(!res.is_ok())
     {
       return pplx::task<etcd::Response>([res]()
       {
-        return etcd::Response(res.error_code(), res.error_message().c_str());    
-      }, task_options);
+        return etcd::Response(res.error_code(), res.error_message().c_str());
+      }, _task_options);
     }
     else
     {
       params.lease_id = res.value().lease();
     }
   }
-  return Response::create(std::make_shared<etcdv3::AsyncCompareAndSwapAction>(std::move(params), etcdv3::Atomicity_Type::PREV_VALUE), task_options);
+  return Response::create(std::make_shared<etcdv3::AsyncCompareAndSwapAction>(std::move(params), etcdv3::Atomicity_Type::PREV_VALUE), _task_options);
 }
 
-pplx::task<etcd::Response> etcd::Client::modify_if(std::string const & key, std::string const & value, std::string const & old_value, int64_t leaseid)
+pplx::task<etcd::Response> etcd::Client::modify_if(std::string const & key, std::string const & value, std::string const & old_value, int64_t const lease_id)
 {
   etcdv3::ActionParameters params;
   params.key.assign(key);
   params.value.assign(value);
   params.old_value.assign(old_value);
-  params.lease_id = leaseid;
-  params.kv_stub = stub_.get();
-  return Response::create(std::make_shared<etcdv3::AsyncCompareAndSwapAction>(std::move(params), etcdv3::Atomicity_Type::PREV_VALUE), task_options);
+  params.lease_id = lease_id;
+  params.kv_stub = _stub.get();
+  return Response::create(std::make_shared<etcdv3::AsyncCompareAndSwapAction>(std::move(params), etcdv3::Atomicity_Type::PREV_VALUE), _task_options);
 }
 
 
 
-pplx::task<etcd::Response> etcd::Client::modify_if(std::string const & key, std::string const & value, int old_index, int ttl)
+pplx::task<etcd::Response> etcd::Client::modify_if(std::string const & key, std::string const & value, int64_t const old_revision, int const ttl)
 {
   etcdv3::ActionParameters params;
   params.key.assign(key);
   params.value.assign(value);
-  params.old_revision = old_index;
-  params.kv_stub = stub_.get();
+  params.old_revision = old_revision;
+  params.kv_stub = _stub.get();
   if(ttl > 0)
   {
     auto res = leasegrant(ttl).get();
-    if(!res.is_ok()) 
+    if(!res.is_ok())
     {
       return pplx::task<etcd::Response>([res]()
       {
-        return etcd::Response(res.error_code(), res.error_message().c_str());    
-      }, task_options);
+        return etcd::Response(res.error_code(), res.error_message().c_str());
+      }, _task_options);
     }
     else
     {
       params.lease_id = res.value().lease();
     }
   }
-  return Response::create(std::make_shared<etcdv3::AsyncCompareAndSwapAction>(std::move(params), etcdv3::Atomicity_Type::PREV_INDEX), task_options);
+  return Response::create(std::make_shared<etcdv3::AsyncCompareAndSwapAction>(std::move(params), etcdv3::Atomicity_Type::PREV_INDEX), _task_options);
 }
 
-pplx::task<etcd::Response> etcd::Client::modify_if(std::string const & key, std::string const & value, int old_index, int64_t leaseid)
+pplx::task<etcd::Response> etcd::Client::modify_if(std::string const & key, std::string const & value, int64_t const old_revision, int64_t const lease_id)
 {
   etcdv3::ActionParameters params;
   params.key.assign(key);
   params.value.assign(value);
-  params.lease_id = leaseid;
-  params.old_revision = old_index;
-  params.kv_stub = stub_.get();
-  return Response::create(std::make_shared<etcdv3::AsyncCompareAndSwapAction>(std::move(params), etcdv3::Atomicity_Type::PREV_INDEX), task_options);
+  params.lease_id = lease_id;
+  params.old_revision = old_revision;
+  params.kv_stub = _stub.get();
+  return Response::create(std::make_shared<etcdv3::AsyncCompareAndSwapAction>(std::move(params), etcdv3::Atomicity_Type::PREV_INDEX), _task_options);
 }
 
 
@@ -232,8 +232,8 @@ pplx::task<etcd::Response> etcd::Client::rm(std::string const & key)
   etcdv3::ActionParameters params;
   params.key.assign(key);
   params.withPrefix = false;
-  params.kv_stub = stub_.get();
-  return Response::create(std::make_shared<etcdv3::AsyncDeleteAction>(std::move(params)), task_options);
+  params.kv_stub = _stub.get();
+  return Response::create(std::make_shared<etcdv3::AsyncDeleteAction>(std::move(params)), _task_options);
 }
 
 
@@ -242,27 +242,27 @@ pplx::task<etcd::Response> etcd::Client::rm_if(std::string const & key, std::str
   etcdv3::ActionParameters params;
   params.key.assign(key);
   params.old_value.assign(old_value);
-  params.kv_stub = stub_.get();
-  return Response::create(std::make_shared<etcdv3::AsyncCompareAndDeleteAction>(std::move(params), etcdv3::Atomicity_Type::PREV_VALUE), task_options);
+  params.kv_stub = _stub.get();
+  return Response::create(std::make_shared<etcdv3::AsyncCompareAndDeleteAction>(std::move(params), etcdv3::Atomicity_Type::PREV_VALUE), _task_options);
 }
 
-pplx::task<etcd::Response> etcd::Client::rm_if(std::string const & key, int old_index)
+pplx::task<etcd::Response> etcd::Client::rm_if(std::string const & key, int64_t const old_revision)
 {
   etcdv3::ActionParameters params;
   params.key.assign(key);
-  params.old_revision = old_index;
-  params.kv_stub = stub_.get();
-  return Response::create(std::make_shared<etcdv3::AsyncCompareAndDeleteAction>(std::move(params), etcdv3::Atomicity_Type::PREV_INDEX), task_options);
+  params.old_revision = old_revision;
+  params.kv_stub = _stub.get();
+  return Response::create(std::make_shared<etcdv3::AsyncCompareAndDeleteAction>(std::move(params), etcdv3::Atomicity_Type::PREV_INDEX), _task_options);
 
 }
 
-pplx::task<etcd::Response> etcd::Client::rmdir(std::string const & key, bool recursive)
+pplx::task<etcd::Response> etcd::Client::rmdir(std::string const & key, bool const recursive)
 {
   etcdv3::ActionParameters params;
   params.key.assign(key);
   params.withPrefix = recursive;
-  params.kv_stub = stub_.get();
-  return Response::create(std::make_shared<etcdv3::AsyncDeleteAction>(std::move(params)), task_options);
+  params.kv_stub = _stub.get();
+  return Response::create(std::make_shared<etcdv3::AsyncDeleteAction>(std::move(params)), _task_options);
 }
 
 pplx::task<etcd::Response> etcd::Client::ls(std::string const & key)
@@ -270,35 +270,31 @@ pplx::task<etcd::Response> etcd::Client::ls(std::string const & key)
   etcdv3::ActionParameters params;
   params.key.assign(key);
   params.withPrefix = true;
-  params.kv_stub = stub_.get();
-  return Response::create(std::make_shared<etcdv3::AsyncGetAction>(std::move(params)), task_options);
+  params.kv_stub = _stub.get();
+  return Response::create(std::make_shared<etcdv3::AsyncGetAction>(std::move(params)), _task_options);
 }
 
-pplx::task<etcd::Response> etcd::Client::watch(std::string const & key, bool recursive)
+pplx::task<etcd::Response> etcd::Client::watch(std::string const & key, bool const recursive)
+{
+  return watch(key, 0, recursive);
+}
+
+pplx::task<etcd::Response> etcd::Client::watch(std::string const & key, int64_t const from_revision, bool const recursive)
 {
   etcdv3::ActionParameters params;
   params.key.assign(key);
   params.withPrefix = recursive;
-  params.watch_stub = watchServiceStub.get();
-  return Response::create(std::make_shared<etcdv3::AsyncWatchAction>(std::move(params)), task_options);
+  params.revision = from_revision;
+  params.watch_stub = _watch_service_stub.get();
+  return Response::create(std::make_shared<etcdv3::AsyncWatchAction>(std::move(params)), _task_options);
 }
 
-pplx::task<etcd::Response> etcd::Client::watch(std::string const & key, int fromRevision, bool recursive)
-{
-  etcdv3::ActionParameters params;
-  params.key.assign(key);
-  params.withPrefix = recursive;
-  params.revision = fromRevision;
-  params.watch_stub = watchServiceStub.get();
-  return Response::create(std::make_shared<etcdv3::AsyncWatchAction>(std::move(params)), task_options);
-}
-
-pplx::task<etcd::Response> etcd::Client::leasegrant(int ttl)
+pplx::task<etcd::Response> etcd::Client::leasegrant(int const ttl)
 {
   etcdv3::ActionParameters params;
   params.ttl = ttl;
-  params.lease_stub = leaseServiceStub.get();
-  return Response::create(std::make_shared<etcdv3::AsyncLeaseGrantAction>(std::move(params)), task_options);
+  params.lease_stub = _lease_service_stub.get();
+  return Response::create(std::make_shared<etcdv3::AsyncLeaseGrantAction>(std::move(params)), _task_options);
 }
 
 

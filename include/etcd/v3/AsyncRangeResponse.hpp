@@ -14,8 +14,8 @@ namespace etcdv3
   class AsyncRangeResponse : public etcdv3::V3Response
   {
     public:
-      AsyncRangeResponse(){};
-      void ParseResponse(RangeResponse& resp, bool prefix=false);
+      using V3Response::V3Response;
+      AsyncRangeResponse(RangeResponse const & resp, bool const prefix = false);
   };
 }
 

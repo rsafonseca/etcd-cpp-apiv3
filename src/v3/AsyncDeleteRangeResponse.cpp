@@ -2,33 +2,32 @@
 #include <etcd/v3/action_constants.hpp>
 
 
-void etcdv3::AsyncDeleteRangeResponse::ParseResponse(std::string const& key, bool prefix, DeleteRangeResponse& resp)
+etcdv3::AsyncDeleteRangeResponse::AsyncDeleteRangeResponse(
+    etcdserverpb::DeleteRangeResponse const & resp,
+    bool const prefix)
 {
-  index = resp.header().revision();
-
-  if(resp.prev_kvs_size() == 0)
+  revision = resp.header().revision();
+  if (resp.prev_kvs_size() == 0)
   {
-    error_code=100;
-    error_message="Key not found";
+    error_code = 100;
+    error_message = "Key not found";
   }
   else
   {
     action = etcdv3::DELETE_ACTION;
     //get all previous values
-    for(int cnt=0; cnt < resp.prev_kvs_size(); cnt++)
+    for (int cnt = 0; cnt < resp.prev_kvs_size(); cnt++)
     {
-      etcdv3::KeyValue kv; 
+      etcdv3::KeyValue kv;
       kv.kvs.CopyFrom(resp.prev_kvs(cnt));
       values.push_back(kv);
     }
-
-    if(!prefix)
+    if (!prefix)
     {
       prev_value = values[0];
       value = values[0];
       value.kvs.clear_value();
       values.clear();
     }
-
   }
 }

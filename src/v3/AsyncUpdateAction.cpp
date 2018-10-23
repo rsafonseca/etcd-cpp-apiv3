@@ -15,7 +15,7 @@ etcdv3::AsyncUpdateAction::AsyncUpdateAction(etcdv3::ActionParameters param)
 {
   etcdv3::Transaction transaction(parameters.key);
   transaction.init_compare(Compare::CompareResult::Compare_CompareResult_GREATER,
-		  	  	  	  	  	   Compare::CompareTarget::Compare_CompareTarget_VERSION);
+                           Compare::CompareTarget::Compare_CompareTarget_VERSION);
 
   transaction.setup_compare_and_swap_sequence(parameters.value, parameters.lease_id);
 
@@ -25,26 +25,15 @@ etcdv3::AsyncUpdateAction::AsyncUpdateAction(etcdv3::ActionParameters param)
 
 etcdv3::AsyncTxnResponse etcdv3::AsyncUpdateAction::ParseResponse()
 {
-  AsyncTxnResponse txn_resp;
-  
-  if(!status.ok())
+  if (!status.ok())
   {
-    txn_resp.set_error_code(status.error_code());
-    txn_resp.set_error_message(status.error_message());
+    return AsyncTxnResponse(status.error_code(), status.error_message());
   }
-  else
-  { 
-    if(reply.succeeded())
-    {
-      txn_resp.ParseResponse(parameters.key, parameters.withPrefix, reply);
-      txn_resp.set_action(etcdv3::UPDATE_ACTION);
-    }
-    else
-    {
-      txn_resp.set_error_code(100);
-      txn_resp.set_error_message("Key not found");
-    }
 
+  if (reply.succeeded())
+  {
+    return AsyncTxnResponse(reply, parameters.withPrefix, etcdv3::UPDATE_ACTION);
   }
-  return txn_resp;
+
+  return AsyncTxnResponse(100, "Key not found");
 }

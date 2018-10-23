@@ -7,17 +7,17 @@
 #include <etcd/v3/V3Response.hpp>
 
 
-using etcdserverpb::WatchRequest;
+using etcdserverpb::WatchRequest;//
 using etcdserverpb::WatchResponse;
-using etcdserverpb::KV;
+using etcdserverpb::KV;//
 
 namespace etcdv3
 {
   class AsyncWatchResponse : public etcdv3::V3Response
   {
     public:
-      AsyncWatchResponse();
-      void ParseResponse(WatchResponse& resp);
+      using V3Response::V3Response;
+      AsyncWatchResponse(WatchResponse const & reply);
   };
 }
 
