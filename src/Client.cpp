@@ -57,12 +57,12 @@ pplx::task<etcd::Response> etcd::Client::set(std::string const & key, std::strin
     {
       return pplx::task<etcd::Response>([res]()
       {
-        return etcd::Response(res.error_code(), res.error_message().c_str());
+        return etcd::Response(res.error_code, std::move(res.error_message));
       }, _task_options);
     }
     else
     {
-      params.lease_id = res.value().lease();
+      params.lease_id = res.value.lease_id;
     }
   }
   return Response::create(std::make_shared<etcdv3::AsyncSetAction>(std::move(params)), _task_options);
@@ -93,12 +93,12 @@ pplx::task<etcd::Response> etcd::Client::add(std::string const & key, std::strin
     {
       return pplx::task<etcd::Response>([res]()
       {
-        return etcd::Response(res.error_code(), res.error_message().c_str());
+        return etcd::Response(res.error_code, std::move(res.error_message));
       }, _task_options);
     }
     else
     {
-      params.lease_id = res.value().lease();
+      params.lease_id = res.value.lease_id;
     }
   }
   return Response::create(std::make_shared<etcdv3::AsyncSetAction>(std::move(params), true), _task_options);
@@ -129,12 +129,12 @@ pplx::task<etcd::Response> etcd::Client::modify(std::string const & key, std::st
     {
       return pplx::task<etcd::Response>([res]()
       {
-        return etcd::Response(res.error_code(), res.error_message().c_str());
+        return etcd::Response(res.error_code, std::move(res.error_message));
       }, _task_options);
     }
     else
     {
-      params.lease_id = res.value().lease();
+      params.lease_id = res.value.lease_id;
     }
   }
   return Response::create(std::make_shared<etcdv3::AsyncUpdateAction>(std::move(params)), _task_options);
@@ -166,12 +166,12 @@ pplx::task<etcd::Response> etcd::Client::modify_if(std::string const & key, std:
     {
       return pplx::task<etcd::Response>([res]()
       {
-        return etcd::Response(res.error_code(), res.error_message().c_str());
+        return etcd::Response(res.error_code, std::move(res.error_message));
       }, _task_options);
     }
     else
     {
-      params.lease_id = res.value().lease();
+      params.lease_id = res.value.lease_id;
     }
   }
   return Response::create(std::make_shared<etcdv3::AsyncCompareAndSwapAction>(std::move(params), etcdv3::Atomicity_Type::PREV_VALUE), _task_options);
@@ -204,12 +204,12 @@ pplx::task<etcd::Response> etcd::Client::modify_if(std::string const & key, std:
     {
       return pplx::task<etcd::Response>([res]()
       {
-        return etcd::Response(res.error_code(), res.error_message().c_str());
+        return etcd::Response(res.error_code, std::move(res.error_message));
       }, _task_options);
     }
     else
     {
-      params.lease_id = res.value().lease();
+      params.lease_id = res.value.lease_id;
     }
   }
   return Response::create(std::make_shared<etcdv3::AsyncCompareAndSwapAction>(std::move(params), etcdv3::Atomicity_Type::PREV_INDEX), _task_options);

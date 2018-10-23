@@ -8,16 +8,18 @@
 static std::string etcd_uri("http://127.0.0.1:2379");
 static int watcher_called = 0;
 
-void printResponse(etcd::Response const & resp)
+void printResponse(etcd::Response && resp)
 {
   ++watcher_called;
   std::cout << "print response called" << std::endl;
-  if (resp.error_code())
-    std::cout << "ERROR:\n" << resp.error_code() << ": " << resp.error_message() << std::endl;
+  if (resp.error_code)
+    std::cout << "ERROR:\n" << resp.error_code << ": " << resp.error_message << std::endl;
   else
   {
-    std::cout << "Action: " << resp.action() << ", value: " << resp.value().as_string() << std::endl;
-    std::cout << "Previous value: " << resp.prev_value().as_string() << std::endl;
+    auto action = std::move(resp.action);
+    auto value = std::move(resp.value.value);
+    std::cout << "Action: " << action << ", value: " << value << std::endl;
+    std::cout << "Previous value: " << resp.prev_value.value << std::endl;
   }
 }
 
@@ -36,7 +38,7 @@ TEST_CASE("create watcher with cancel")
   etcd.set("/test/key", "44");
   sleep(1);
   CHECK(4 == watcher_called);
-  watcher.Cancel();
+  watcher.cancel();
   etcd.set("/test/key", "50");
   etcd.set("/test/key", "51");
   sleep(1);
@@ -74,8 +76,8 @@ TEST_CASE("create watcher")
 //   sleep(1);
 
 //   REQUIRE(res.is_done());
-//   REQUIRE("set" == res.get().action());
-//   CHECK("43" == res.get().value().as_string());
+//   REQUIRE("set" == res.get().action);
+//   CHECK("43" == res.get().value.value);
 // }
 
 // TEST_CASE("wait for a directory change")
@@ -86,16 +88,16 @@ TEST_CASE("create watcher")
 
 //   etcd.add("/test/key4", "44").wait();
 //   REQUIRE(res.is_done());
-//   CHECK("create" == res.get().action());
-//   CHECK("44" == res.get().value().as_string());
+//   CHECK("create" == res.get().action);
+//   CHECK("44" == res.get().value.value);
 
 //   pplx::task<etcd::Response> res2 = etcd.watch("/test", true);
 
 //   etcd.set("/test/key4", "45").wait();
 //   sleep(1);
 //   REQUIRE(res2.is_done());
-//   CHECK("set" == res2.get().action());
-//   CHECK("45" == res2.get().value().as_string());
+//   CHECK("set" == res2.get().action);
+//   CHECK("45" == res2.get().value.value);
 // }
 
 // TEST_CASE("watch changes in the past")
@@ -109,16 +111,16 @@ TEST_CASE("create watcher")
 //   etcd.set("/test/key1", "45").wait();
 
 //   etcd::Response res = etcd.watch("/test/key1", ++index).get();
-//   CHECK("set" == res.action());
-//   CHECK("43" == res.value().as_string());
+//   CHECK("set" == res.action);
+//   CHECK("43" == res.value.value);
 
 //   res = etcd.watch("/test/key1", ++index).get();
-//   CHECK("set" == res.action());
-//   CHECK("44" == res.value().as_string());
+//   CHECK("set" == res.action);
+//   CHECK("44" == res.value.value);
 
 //   res = etcd.watch("/test", ++index, true).get();
-//   CHECK("set" == res.action());
-//   CHECK("45" == res.value().as_string());
+//   CHECK("set" == res.action);
+//   CHECK("45" == res.value.value);
 // }
 
 // TEST_CASE("request cancellation")
@@ -146,5 +148,5 @@ TEST_CASE("create watcher")
 //     std::cout << "std::exception: " << ex.what() << "\n";
 //   }
 // }
-   etcd.rmdir("/test", true).error_code();
+   etcd.rmdir("/test", true).error_code;
 }

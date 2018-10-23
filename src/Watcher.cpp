@@ -49,7 +49,7 @@ etcd::Watcher::Watcher(
   doWatch();
 }
 
-void etcd::Watcher::Cancel()
+void etcd::Watcher::cancel()
 {
   if (isCancelled)
   {
@@ -64,7 +64,7 @@ void etcd::Watcher::Cancel()
   isCancelled = true;
 }
 
-bool etcd::Watcher::Cancelled() const
+bool etcd::Watcher::cancelled() const
 {
   return isCancelled;
 }
@@ -73,7 +73,7 @@ etcd::Watcher::~Watcher()
 {
   try
   {
-    Cancel();
+    cancel();
   } catch (...)
   {}
 }

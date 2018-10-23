@@ -78,7 +78,7 @@ etcd-cpp-api is a C++ API for [etcd]
 ```c++
   etcd::Client etcd("http://127.0.0.1:4001");
   etcd::Response response = etcd.get("/test/key1").get();
-  std::cout << response.value().as_string();
+  std::cout << response.value.value;
 ```
 
 Methods of the etcd client object are sending the corresponding gRPC requests and are returning
@@ -95,7 +95,7 @@ also returns the ```etcd::Response``` object.
   pplx::task<etcd::Response> response_task = etcd.get("/test/key1");
   // ... do something else
   etcd::Response response = response_task.get();
-  std::cout << response.value().as_string();
+  std::cout << response.value.value;
 ```
 
 The pplx library allows to do even more. You can attach continuation ojects to the task if you do
@@ -109,7 +109,7 @@ probably use a C++ lambda funcion here as a callback.
   etcd::Client etcd("http://127.0.0.1:4001");
   etcd.get("/test/key1").then([](etcd::Response response)
   {
-    std::cout << response.value().as_string();
+    std::cout << response.value.value;
   });
 
   // ... your code can continue here without any delay
@@ -128,7 +128,7 @@ this case since the respose has been already arrived (we are inside the callback
     try
     {
       etcd::Response response = response.task.get(); // can throw
-      std::cout << response.value().as_string();
+      std::cout << response.value.value;
     }
     catch (std::ecxeption const & ex)
     {
@@ -145,9 +145,9 @@ this case since the respose has been already arrived (we are inside the callback
 
 You can read a value with the ```get``` method of the clinent instance. The only parameter is the
 key to be read. If the read operation is successful then the value of the key can be acquired with
-the ```value()``` method of the response. Success of the operation can be checked with the
-```is_ok()``` method of the response. In case of an error, the ```error_code()``` and
-```error_message()``` methods can be called for some further detail.
+the ```value``` member of the response. Success of the operation can be checked with the
+```is_ok()``` method of the response. In case of an error, the ```error_code``` and
+```error_message``` members can be used for some further detail.
 
 Please note that there can be two kind of error situations. There can be some problem with the
 communication between the client and the etcd server. In this case the ```get()``` method of the
@@ -157,7 +157,7 @@ response object will give you all the details. Let's see this in an example.
 
 The Value object of the response also holds some extra information besides the string value of the
 key. You can also get the index number of the creation and the last modification of this key with
-the ```created_revision()``` and the ```modified_revision()``` methods.
+the ```created_revision``` and the ```modified_revision``` members.
 
 ```c++
   etcd::Client etcd("http://127.0.0.1:4001");
@@ -167,9 +167,9 @@ the ```created_revision()``` and the ```modified_revision()``` methods.
   {
     etcd::Response response = response_task.get(); // can throw
     if (response.is_ok())
-      std::cout << "successful read, value=" << response.value().as_string();
+      std::cout << "successful read, value=" << response.value.value;
     else
-      std::cout << "operation failed, details: " << response.error_message();
+      std::cout << "operation failed, details: " << response.error_message;
   }
   catch (std::ecxeption const & ex)
   {
@@ -181,10 +181,10 @@ the ```created_revision()``` and the ```modified_revision()``` methods.
 
 Setting the value of a key can be done with the ```set()``` method of the client. You simply pass
 the key and the value as string parameters and you are done. The newly set value object can be asked
-from the response object exactly the same way as in case of the reading (with the ```value()```
-method). This way you can check for example the index value of your modification. You can also check
+from the response object exactly the same way as in case of the reading (with the ```value```
+member). This way you can check for example the index value of your modification. You can also check
 what was the previous value that this operation was overwritten. You can do that with the
-```prev_value()``` method of the response object.
+```prev_value``` member of the response object.
 
 ```c++
   etcd::Client etcd("http://127.0.0.1:4001");
@@ -195,9 +195,9 @@ what was the previous value that this operation was overwritten. You can do that
     etcd::Response response = response_task.get();
     if (response.is_ok())
       std::cout << "The new value is successfully set, previous value was "
-                << response.prev_value().as_string();
+                << response.prev_value.value;
     else
-      std::cout << "operation failed, details: " << response.error_message();
+      std::cout << "operation failed, details: " << response.error_message;
   }
   catch (std::ecxeption const & ex)
   {
@@ -253,7 +253,7 @@ Listing directory in etcd3 cpp client will return all keys that matched the give
   
   etcd::Response resp = etcd.ls("/test/new_dir").get();
 ```
-resp.key() will have the following values:
+resp.key will have the following values:
 /test/key1 
 /test/key2 
 /test/key3
@@ -264,25 +264,24 @@ Note: Regarding the returned keys when listing a directory:
 In etcdv3 cpp client, resp.key(0) will return "/test/new_dir/key1" since everything is treated as keys in etcdv3.
 While in etcdv2 cpp client it will return "key1" and "/test/new_dir" directory should be created first before you can set "key1".
 
-When you list a directory the response object's ```keys()``` and ```values()``` methods gives you a
-vector of key names and values. The ```value()``` method with an integer parameter also
-returns with the i-th element of the values vector, so ```response.values()[i] ==
-response.value(i)```. 
+When you list a directory the response object's ```keys``` and ```values``` members gives you a
+vector of key names and values. The ```values``` member with an integer parameter
+returns with the i-th element of the values vector: ```response.values[i]```.
 
 ```c++
   etcd::Client etcd("http://127.0.0.1:4001");
   etcd::Response resp = etcd.ls("/test/new_dir").get();
-  for (int i = 0; i < resp.keys().size(); ++i)
+  for (int i = 0; i < resp.keys.size(); ++i)
   {
-    std::cout << resp.keys(i);
-    std::cout << " = " << resp.value(i).as_string() << std::endl;
+    std::cout << resp.keys[i];
+    std::cout << " = " << resp.values[i].value << std::endl;
   }
 ```
 
 3. Removing directory:
 If you want the delete recursively then you have to pass a second ```true``` parameter 
 to rmdir and supply a key. This key will be treated as a prefix. All keys that match the prefix will
-be deleted. All deleted keys will be placed in response.values() and response.keys(). This parameter defaults to ```false```.
+be deleted. All deleted keys will be placed in response.values and response.keys. This parameter defaults to ```false```.
 
 ```c++
   etcd::Client etcd("http://127.0.0.1:4001");
@@ -290,10 +289,10 @@ be deleted. All deleted keys will be placed in response.values() and response.ke
   etcd.set("/test/key2", "bar");
   etcd.set("/test/key3", "foo_bar");
   etcd::Response resp = etcd.rmdir("/test", true).get();
-  for (int i = 0; i < resp.keys().size(); ++i)
+  for (int i = 0; i < resp.keys.size(); ++i)
   {
-    std::cout << resp.keys(i);
-    std::cout << " = " << resp.value(i).as_string() << std::endl;
+    std::cout << resp.keys[i];
+    std::cout << " = " << resp.values[i].value << std::endl;
   }  
 
 ```
@@ -306,15 +305,15 @@ Watching for a change is possible with the ```watch()``` operation of the client
 simply does not deliver a response object until the watched value changes in any way (modified or
 deleted). When a change happens the returned result object will be the same as the result object of
 the modification operation. So if the change is triggered by a value change, then
-```response.action()``` will return "set", ```response.value()``` will hold the new
-value and ```response.prev_value()``` will contain the previous value. In case of a delete
-```response.action()``` will return "delete", ```response.value()``` will be empty and should not be
-called at all and ```response.prev_value()``` will contain the deleted value.
+```response.action``` will be equal to "set", ```response.value``` will hold the new
+value and ```response.prev_value``` will contain the previous value. In case of a delete
+```response.action``` will be equal to "delete", ```response.value``` will be empty and should not be
+accessed at all and ```response.prev_value``` will contain the deleted value.
 
 As mentioned in the section "handling directory nodes", directory nodes are not supported anymore in etcdv3.
 However it is still possible to watch a whole "directory subtree", or more specifically a set of keys that match the 
 prefix, for changes with passing ```true``` to the second ```recursive``` parameter of ```watch``` 
-(this parameter defaults to ```false``` if omitted). In this case the modified value object's ```key()``` method can be 
+(this parameter defaults to ```false``` if omitted). In this case the modified value object's ```key``` member can be
 handy to determine what key is actually changed. Since this can be a long lasting operation you have to be prepared that is
 terminated by an exception and you have to restart the watch operation.
 
@@ -333,7 +332,7 @@ void watch_for_changes()
     {
       etcd::Response resp = resp_task.get();
       index = resp.index();
-      std::cout << resp.action() << " " << resp.value().as_string() << std::endl;
+      std::cout << resp.action << " " << resp.value.value << std::endl;
     }
     catch(...) {}
     watch_for_changes();
@@ -355,26 +354,26 @@ Also the ttl will that was granted by etcd server will be indicated in ttl().
 ```c++
   etcd::Client etcd("http://127.0.0.1:4001");
   etcd::Response resp = etcd.leasegrant(60).get();
-  etcd.set("/test/key2", "bar", resp.value().lease());
-  std::cout <<"ttl" << resp.value().ttl();
+  etcd.set("/test/key2", "bar", resp.value.lease_id);
+  std::cout <<"ttl" << resp.value.ttl;
 
 ```
 
 ### Watcher Class
 Users can watch a key indefinitely or until user cancels the watch. This can be done by instantiating a Watcher class.
 The supplied callback function in Watcher class will be called every time there is an event for the specified key.
-Watch stream will be cancelled either by user implicitly calling Cancel() or when watcher class is destroyed.
+Watch stream will be cancelled either by user implicitly calling cancel() or when watcher class is destroyed.
 
 ```c++
   etcd::Watcher watcher("http://127.0.0.1:2379", "/test", printResponse);
   etcd.set("/test/key", "42"); /* print response will be called */
   etcd.set("/test/key", "43"); /* print response will be called */
-  watcher.Cancel();
+  watcher.cancel();
   etcd.set("/test/key", "43"); /* print response will NOT be called, since watch is already cancelled */
 }
 ```
 
 ### TODO
-1. Cancellation of asynchronous calls(except for watch)
+1. Cancellation of asynchronous calls (except for watch)
 2. LeaseKeepAlive
 

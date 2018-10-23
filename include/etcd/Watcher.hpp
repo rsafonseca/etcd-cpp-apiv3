@@ -40,8 +40,8 @@ public:
 		const int fromIndex,
 		std::function<void(Response)> callback,
 		const pplx::task_options & task_options = pplx::task_options());
-	void Cancel();
-	bool Cancelled() const;
+	void cancel();
+	bool cancelled() const;
 	~Watcher();
 
 protected:

@@ -95,7 +95,7 @@ void etcdv3::AsyncWatchAction::cancelWatch()
   }
 }
 
-void etcdv3::AsyncWatchAction::waitForResponse(std::function<void(etcd::Response)> const & callback)
+void etcdv3::AsyncWatchAction::waitForResponse(watch_callback const & callback)
 {
   void * got_tag;
   bool ok = false;
@@ -114,7 +114,7 @@ void etcdv3::AsyncWatchAction::waitForResponse(std::function<void(etcd::Response
     if (response.events_size())
     {
       // callback is responsible for errors handling
-      callback(ParseResponse());
+      callback(etcd::Response(ParseResponse()));
     }
     stream->Read(&response, (void *)this);
   }
