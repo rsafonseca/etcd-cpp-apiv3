@@ -83,10 +83,13 @@ void etcd::Watcher::doWatch()
   try
   {
     if (call) {
+      // in case of watch recreate, continue from last received revision
+      watch_action_parameters.revision = call->lastRevision();
       call->cancelWatch();
     }
     currentTask.wait();
-  } catch (...)
+  }
+  catch (...)
   {}
   call.reset(new etcdv3::AsyncWatchAction(watch_action_parameters));
   currentTask = pplx::task<void>([this]()

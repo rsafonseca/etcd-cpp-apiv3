@@ -9,6 +9,7 @@ using etcdserverpb::WatchCreateRequest;
 
 etcdv3::AsyncWatchAction::AsyncWatchAction(etcdv3::ActionParameters param)
   : etcdv3::Action(std::move(param))
+  , revision(parameters.revision)
   , isCancelled(false)
   , stream(parameters.watch_stub->AsyncWatch(&context, &cq_, (void*)"create"))
 {
@@ -95,6 +96,19 @@ void etcdv3::AsyncWatchAction::cancelWatch()
   }
 }
 
+int64_t etcdv3::AsyncWatchAction::lastRevision() const
+{
+  return revision;
+}
+
+void etcdv3::AsyncWatchAction::storeLastRevision()
+{
+  if (response.has_header())
+  {
+    revision = response.header().revision();
+  }
+}
+
 void etcdv3::AsyncWatchAction::waitForResponse(watch_callback const & callback)
 {
   void * got_tag;
@@ -109,12 +123,17 @@ void etcdv3::AsyncWatchAction::waitForResponse(watch_callback const & callback)
       break;
     }
 
-    // if ok and read done, call callback and just read again
-    // call callback only if reply has events
+    storeLastRevision();
+    // if ok and read done, call callback (only if reply has events) and just read again
     if (response.events_size())
     {
-      // callback is responsible for errors handling
-      callback(etcd::Response(ParseResponse()));
+      // callback is responsible for errors handling, all raised exceptions will be ignored
+      try
+      {
+        callback(etcd::Response(ParseResponse()));
+      }
+      catch (...)
+      {}
     }
     stream->Read(&response, (void *)this);
   }
