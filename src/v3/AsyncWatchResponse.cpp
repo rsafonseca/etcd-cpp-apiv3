@@ -5,7 +5,7 @@
 etcdv3::AsyncWatchResponse::AsyncWatchResponse(WatchResponse const & reply)
 {
   revision = reply.header().revision();
-  for (int cnt = 0; cnt < reply.events_size(); cnt++)
+  for (int cnt = reply.events_size() - 1; cnt >= 0; cnt--)
   {
     auto event = reply.events(cnt);
 
@@ -29,7 +29,7 @@ etcdv3::AsyncWatchResponse::AsyncWatchResponse(WatchResponse const & reply)
     }
 
     // TODO: maybe change this logic
-    // just store the first occurence of the key in values.
+    // just store the first occurence of the key in values (with latest revision).
     // this is done so tas client will not need to change their behaviour.
     // break immediately
     break;
