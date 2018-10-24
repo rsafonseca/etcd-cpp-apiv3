@@ -8,13 +8,13 @@ namespace etcdv3
 {
   class KeyValue
   {
-    public:
-      KeyValue() = default;
-      mvccpb::KeyValue kvs;
-      void set_ttl(int const ttl);
-      int get_ttl() const;
-    private:
-      int ttl = 0;
+  public:
+    KeyValue() = default;
+    mvccpb::KeyValue kvs;
+    void set_ttl(int const ttl);
+    int get_ttl() const;
+  private:
+    int ttl = 0;
   };
 }
 #endif

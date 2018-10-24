@@ -15,12 +15,12 @@ namespace etcdv3
 {
   class AsyncUpdateAction : public etcdv3::Action
   {
-    public:
-      AsyncUpdateAction(etcdv3::ActionParameters param);
-      AsyncTxnResponse ParseResponse();
-    private:
-      TxnResponse reply;
-      std::unique_ptr<ClientAsyncResponseReader<TxnResponse>> response_reader;
+  public:
+    AsyncUpdateAction(etcdv3::ActionParameters param);
+    AsyncTxnResponse ParseResponse();
+  private:
+    TxnResponse reply;
+    std::unique_ptr<ClientAsyncResponseReader<TxnResponse>> response_reader;
   };
 }
 

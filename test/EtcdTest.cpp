@@ -333,12 +333,15 @@ TEST_CASE("watch changes in the past")
 
   etcd::Response res = etcd.watch("/test/key1", ++revision).get();
   CHECK("set" == res.action);
-  CHECK("43" == res.value.value);
-  CHECK("42" == res.prev_value.value);
+  // we`re looking for last change made since specific revision
+  CHECK("45" == res.value.value);
+  CHECK("44" == res.prev_value.value);
 
   res = etcd.watch("/test/key1", ++revision).get();
   CHECK("set" == res.action);
-  CHECK("44" == res.value.value);
+  // we`re looking for last change made since specific revision
+  // TODO: all events should be stored in values
+  CHECK("45" == res.value.value);
 
   res = etcd.watch("/test", ++revision, true).get();
   CHECK("set" == res.action);

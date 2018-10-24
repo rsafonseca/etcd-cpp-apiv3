@@ -33,10 +33,12 @@ namespace etcd
      */
     Client(std::string const & etcd_url, const pplx::task_options & task_options = pplx::task_options());
 
-	/**
-     * Returns shared pointer to client channel.
+    /**
+     * Constructs an etcd client object.
+     * @param channel is the shared_ptr to gRPC channel, which will be used by client stubs
+     * @param taskOptions is the cpprest tasks options (needed for async tasks runtime settings handling)
      */
-    std::shared_ptr<Channel> channel() const;
+    Client(std::shared_ptr<Channel>const & channel, const pplx::task_options & task_options = pplx::task_options());
 
     /**
      * Sends a get request to the etcd server
@@ -192,14 +194,11 @@ namespace etcd
 
   private:
 
-    const std::shared_ptr<Channel> _channel;
-	const std::unique_ptr<KV::Stub> _stub;
+    const std::unique_ptr<KV::Stub> _stub;
     const std::unique_ptr<Watch::Stub> _watch_service_stub;
     const std::unique_ptr<Lease::Stub> _lease_service_stub;
-	const pplx::task_options _task_options;
-};
-
-
+    const pplx::task_options _task_options;
+  };
 
 }
 

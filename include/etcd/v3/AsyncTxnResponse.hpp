@@ -10,9 +10,9 @@ namespace etcdv3
 {
   class AsyncTxnResponse : public etcdv3::V3Response
   {
-    public:
-      using V3Response::V3Response;
-      AsyncTxnResponse(TxnResponse const & resp, bool const prefix, char const * const action);
+  public:
+    using V3Response::V3Response;
+    AsyncTxnResponse(TxnResponse const & resp, bool const prefix, char const * const action);
   };
 }
 

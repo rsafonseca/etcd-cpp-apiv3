@@ -14,9 +14,9 @@ namespace etcdv3
 {
   class AsyncDeleteRangeResponse : public etcdv3::V3Response
   {
-    public:
-      using V3Response::V3Response;
-      AsyncDeleteRangeResponse(DeleteRangeResponse const & resp, bool const prefix);
+  public:
+    using V3Response::V3Response;
+    AsyncDeleteRangeResponse(DeleteRangeResponse const & resp, bool const prefix);
   };
 }
 

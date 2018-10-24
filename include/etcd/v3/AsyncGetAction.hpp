@@ -14,12 +14,12 @@ namespace etcdv3
 {
   class AsyncGetAction : public etcdv3::Action
   {
-    public:
-      AsyncGetAction(etcdv3::ActionParameters param);
-      AsyncRangeResponse ParseResponse();
-    private:
-      RangeResponse reply;
-      std::unique_ptr<ClientAsyncResponseReader<RangeResponse>> response_reader;
+  public:
+    AsyncGetAction(etcdv3::ActionParameters param);
+    AsyncRangeResponse ParseResponse();
+  private:
+    RangeResponse reply;
+    std::unique_ptr<ClientAsyncResponseReader<RangeResponse>> response_reader;
   };
 }
 

@@ -15,13 +15,13 @@ namespace etcdv3
 {
   class AsyncSetAction : public etcdv3::Action
   {
-    public:
-      AsyncSetAction(etcdv3::ActionParameters param, bool const create = false);
-      AsyncTxnResponse ParseResponse();
-    private:
-      TxnResponse reply;
-      std::unique_ptr<ClientAsyncResponseReader<TxnResponse>> response_reader;
-      bool isCreate;
+  public:
+    AsyncSetAction(etcdv3::ActionParameters param, bool const create = false);
+    AsyncTxnResponse ParseResponse();
+  private:
+    TxnResponse reply;
+    std::unique_ptr<ClientAsyncResponseReader<TxnResponse>> response_reader;
+    bool isCreate;
   };
 }
 

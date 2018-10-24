@@ -14,7 +14,6 @@ using etcdserverpb::Lease;
 
 namespace etcdv3
 {
-
   enum Atomicity_Type
   {
     PREV_INDEX = 0,
@@ -23,35 +22,33 @@ namespace etcdv3
 
   struct ActionParameters
   {
-      ActionParameters() = default;
-      ActionParameters(ActionParameters &&) = default;
-      ActionParameters(ActionParameters const &) = default;
-      bool withPrefix = false;
-      int64_t revision = 0;
-      int64_t old_revision = 0;
-      int64_t lease_id = 0;
-      int ttl = 0;
-      std::string key;
-      std::string value;
-      std::string old_value;
-      KV::Stub* kv_stub = nullptr;
-      Watch::Stub* watch_stub = nullptr;
-      Lease::Stub* lease_stub = nullptr;
+    ActionParameters() = default;
+    ActionParameters(ActionParameters &&) = default;
+    ActionParameters(ActionParameters const &) = default;
+    bool withPrefix = false;
+    int64_t revision = 0;
+    int64_t old_revision = 0;
+    int64_t lease_id = 0;
+    int ttl = 0;
+    std::string key;
+    std::string value;
+    std::string old_value;
+    KV::Stub* kv_stub = nullptr;
+    Watch::Stub* watch_stub = nullptr;
+    Lease::Stub* lease_stub = nullptr;
   };
 
   class Action
   {
-    public:
-      Action() = default;
-      Action(ActionParameters params);
-      void waitForResponse();
-    protected:
-      Status status;
-      ClientContext context;
-      CompletionQueue cq_;
-      ActionParameters parameters;
-
+  public:
+    Action() = default;
+    Action(ActionParameters params);
+    void waitForResponse();
+  protected:
+    Status status;
+    ClientContext context;
+    CompletionQueue cq_;
+    ActionParameters parameters;
   };
-
 } // namespace etcdv3
 #endif

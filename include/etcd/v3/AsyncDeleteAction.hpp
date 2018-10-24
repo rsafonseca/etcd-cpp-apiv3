@@ -14,12 +14,12 @@ namespace etcdv3
 {
   class AsyncDeleteAction : public etcdv3::Action
   {
-    public:
-      AsyncDeleteAction(etcdv3::ActionParameters param);
-      AsyncDeleteRangeResponse ParseResponse();
-    private:
-      DeleteRangeResponse reply;
-      std::unique_ptr<ClientAsyncResponseReader<DeleteRangeResponse>> response_reader;
+  public:
+    AsyncDeleteAction(etcdv3::ActionParameters param);
+    AsyncDeleteRangeResponse ParseResponse();
+  private:
+    DeleteRangeResponse reply;
+    std::unique_ptr<ClientAsyncResponseReader<DeleteRangeResponse>> response_reader;
   };
 }
 

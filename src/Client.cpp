@@ -22,17 +22,15 @@ using grpc::Channel;
 
 
 etcd::Client::Client(std::string const & etcd_url, const pplx::task_options & task_options)
-  : _channel(etcd::utils::createChannel(etcd_url))
-  , _stub(KV::NewStub(_channel))
-  , _watch_service_stub(Watch::NewStub(_channel))
-  , _lease_service_stub(Lease::NewStub(_channel))
-  , _task_options(task_options)
+  : Client(etcd::utils::createChannel(etcd_url), task_options)
 {}
 
-std::shared_ptr<Channel> etcd::Client::channel() const
-{
-  return _channel;
-}
+etcd::Client::Client(std::shared_ptr<Channel>const & channel, const pplx::task_options & task_options)
+  : _stub(KV::NewStub(channel))
+  , _watch_service_stub(Watch::NewStub(channel))
+  , _lease_service_stub(Lease::NewStub(channel))
+  , _task_options(task_options)
+{}
 
 pplx::task<etcd::Response> etcd::Client::get(std::string const & key)
 {

@@ -15,12 +15,12 @@ namespace etcdv3
 {
   class AsyncCompareAndSwapAction : public etcdv3::Action
   {
-    public:
-      AsyncCompareAndSwapAction(etcdv3::ActionParameters param, etcdv3::Atomicity_Type type);
-      AsyncTxnResponse ParseResponse();
-    private:
-      TxnResponse reply;
-      std::unique_ptr<ClientAsyncResponseReader<TxnResponse>> response_reader;
+  public:
+    AsyncCompareAndSwapAction(etcdv3::ActionParameters param, etcdv3::Atomicity_Type type);
+    AsyncTxnResponse ParseResponse();
+  private:
+    TxnResponse reply;
+    std::unique_ptr<ClientAsyncResponseReader<TxnResponse>> response_reader;
   };
 }
 

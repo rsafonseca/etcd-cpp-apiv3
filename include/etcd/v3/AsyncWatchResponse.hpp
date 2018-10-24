@@ -15,9 +15,9 @@ namespace etcdv3
 {
   class AsyncWatchResponse : public etcdv3::V3Response
   {
-    public:
-      using V3Response::V3Response;
-      AsyncWatchResponse(WatchResponse const & reply);
+  public:
+    using V3Response::V3Response;
+    AsyncWatchResponse(WatchResponse const & reply);
   };
 }
 

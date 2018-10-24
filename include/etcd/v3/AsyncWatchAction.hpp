@@ -20,21 +20,21 @@ namespace etcdv3
 
   class AsyncWatchAction : public etcdv3::Action
   {
-    public:
-      AsyncWatchAction(etcdv3::ActionParameters param);
-      AsyncWatchResponse ParseResponse();
-      void waitForResponse();
-      void waitForResponse(watch_callback const & callback);
-      void cancelWatch();
-      int64_t lastRevision() const;
+  public:
+    AsyncWatchAction(etcdv3::ActionParameters param);
+    AsyncWatchResponse ParseResponse();
+    void waitForResponse();
+    void waitForResponse(watch_callback const & callback);
+    void cancelWatch();
+    int64_t lastRevision() const;
 
-    private:
-      WatchResponse response;
-      int64_t revision;
-      bool isCancelled;
-      std::unique_ptr<ClientAsyncReaderWriter<WatchRequest, WatchResponse>> stream;
+  private:
+    WatchResponse response;
+    int64_t revision;
+    bool isCancelled;
+    std::unique_ptr<ClientAsyncReaderWriter<WatchRequest, WatchResponse>> stream;
 
-      void storeLastRevision();
+    void storeLastRevision();
   };
 }
 

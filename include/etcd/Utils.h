@@ -6,12 +6,13 @@
 
 namespace etcd {
 
-namespace utils {
+  namespace utils {
 
-std::shared_ptr<grpc::Channel> createChannel(const std::string & address,
-	const std::shared_ptr<grpc::ChannelCredentials> & channel_credentials = grpc::InsecureChannelCredentials());
+    std::shared_ptr<grpc::Channel> createChannel(
+        const std::string & address,
+        const std::shared_ptr<grpc::ChannelCredentials> & channel_credentials = grpc::InsecureChannelCredentials());
 
-} // namespace utils
+  } // namespace utils
 
 } // namespace etcd
 
