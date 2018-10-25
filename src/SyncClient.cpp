@@ -1,4 +1,5 @@
 #include <etcd/SyncClient.hpp>
+#include <etcd/v3/V3Status.h>
 
 #define CHECK_EXCEPTIONS(cmd)                   \
   try                                           \
@@ -7,7 +8,7 @@
   }                                             \
   catch (std::exception const & ex)             \
 {                                             \
-  return etcd::Response(500, ex.what());      \
+  return etcd::Response(etcdv3::StatusCode::USER_DEFINED_ERROR, ex.what());      \
   }
 
 etcd::SyncClient::SyncClient(std::string const & address)

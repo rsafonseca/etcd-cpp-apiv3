@@ -53,9 +53,10 @@ pplx::task<etcd::Response> etcd::Client::set(std::string const & key, std::strin
     auto res = leasegrant(ttl).get();
     if(!res.is_ok())
     {
-      return pplx::task<etcd::Response>([res]()
+      auto status = std::move(res.status);
+      return pplx::task<etcd::Response>([status]()
       {
-        return etcd::Response(res.error_code, std::move(res.error_message));
+        return etcd::Response(status);
       }, _task_options);
     }
     else
@@ -89,9 +90,10 @@ pplx::task<etcd::Response> etcd::Client::add(std::string const & key, std::strin
     auto res = leasegrant(ttl).get();
     if(!res.is_ok())
     {
-      return pplx::task<etcd::Response>([res]()
+      auto status = std::move(res.status);
+      return pplx::task<etcd::Response>([status]()
       {
-        return etcd::Response(res.error_code, std::move(res.error_message));
+        return etcd::Response(status);
       }, _task_options);
     }
     else
@@ -125,9 +127,10 @@ pplx::task<etcd::Response> etcd::Client::modify(std::string const & key, std::st
     auto res = leasegrant(ttl).get();
     if(!res.is_ok())
     {
-      return pplx::task<etcd::Response>([res]()
+      auto status = std::move(res.status);
+      return pplx::task<etcd::Response>([status]()
       {
-        return etcd::Response(res.error_code, std::move(res.error_message));
+        return etcd::Response(status);
       }, _task_options);
     }
     else
@@ -162,9 +165,10 @@ pplx::task<etcd::Response> etcd::Client::modify_if(std::string const & key, std:
     auto res = leasegrant(ttl).get();
     if(!res.is_ok())
     {
-      return pplx::task<etcd::Response>([res]()
+      auto status = std::move(res.status);
+      return pplx::task<etcd::Response>([status]()
       {
-        return etcd::Response(res.error_code, std::move(res.error_message));
+        return etcd::Response(status);
       }, _task_options);
     }
     else
@@ -200,9 +204,10 @@ pplx::task<etcd::Response> etcd::Client::modify_if(std::string const & key, std:
     auto res = leasegrant(ttl).get();
     if(!res.is_ok())
     {
-      return pplx::task<etcd::Response>([res]()
+      auto status = std::move(res.status);
+      return pplx::task<etcd::Response>([status]()
       {
-        return etcd::Response(res.error_code, std::move(res.error_message));
+        return etcd::Response(status);
       }, _task_options);
     }
     else

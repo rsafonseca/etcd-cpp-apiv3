@@ -6,7 +6,7 @@ using etcdserverpb::PutRequest;
 using etcdserverpb::RequestOp;
 using etcdserverpb::DeleteRangeRequest;
 
-etcdv3::Transaction::Transaction(const std::string& key)
+etcdv3::Transaction::Transaction(std::string const & key)
   : key(key)
 {}
 

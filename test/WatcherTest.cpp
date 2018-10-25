@@ -12,8 +12,10 @@ void printResponse(etcd::Response && resp)
 {
   ++watcher_called;
   std::cout << "print response called" << std::endl;
-  if (resp.error_code)
-    std::cout << "ERROR:\n" << resp.error_code << ": " << resp.error_message << std::endl;
+  if (!resp.is_ok()) {
+    std::cout << "grpc error:\n" << (int)resp.status.grpc_error_code << ": " << resp.status.grpc_error_message << "\n"
+              << "etcd error:\n" << (int)resp.status.etcd_error_code << ": " << resp.status.etcd_error_message << std::endl;
+  }
   else
   {
     auto action = std::move(resp.action);
@@ -148,5 +150,5 @@ TEST_CASE("create watcher")
 //     std::cout << "std::exception: " << ex.what() << "\n";
 //   }
 // }
-   etcd.rmdir("/test", true).error_code;
+   CHECK(etcd.rmdir("/test", true).is_ok());
 }

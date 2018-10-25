@@ -17,14 +17,13 @@ namespace etcd
    */
   struct Response
   {
-    int         error_code = 0;
-    std::string error_message;
-    int64_t     revision = 0;
-    std::string action;
-    Value       value;
-    Value       prev_value;
-    Values      values;
-    Keys        keys;
+    int64_t          revision = 0;
+    etcdv3::V3Status status; // TODO: replace by common Status later
+    std::string      action;
+    Value            value;
+    Value            prev_value;
+    Values           values;
+    Keys             keys;
 
     template<typename T> static pplx::task<etcd::Response> create(
         std::shared_ptr<T> call,
@@ -38,14 +37,17 @@ namespace etcd
     }
 
     Response() = default;
-    Response(int const error_code, const char * const error_message);
-    Response(int const error_code, std::string error_message);
-    Response(etcdv3::V3Response && response);
+    Response(etcdv3::StatusCode const etcd_error_code, std::string etcd_error_message);
+    explicit Response(etcdv3::V3Status && status);
+    explicit Response(etcdv3::V3Status const & status);
+    explicit Response(etcdv3::V3Response && response);
 
     /**
      * Returns true if this is a successful response
      */
     bool is_ok() const;
+    bool etcd_is_ok() const;
+    bool grpc_is_ok() const;
   };
 }
 

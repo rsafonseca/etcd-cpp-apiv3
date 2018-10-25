@@ -35,5 +35,5 @@ etcdv3::AsyncTxnResponse etcdv3::AsyncUpdateAction::ParseResponse()
     return AsyncTxnResponse(reply, parameters.withPrefix, etcdv3::UPDATE_ACTION);
   }
 
-  return AsyncTxnResponse(100, "Key not found");
+  return AsyncTxnResponse(etcdv3::StatusCode::KEY_NOT_FOUND, "Key not found");
 }

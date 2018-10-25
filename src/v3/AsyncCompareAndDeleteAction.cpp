@@ -39,10 +39,13 @@ etcdv3::AsyncTxnResponse etcdv3::AsyncCompareAndDeleteAction::ParseResponse()
   }
 
   auto txn_resp = AsyncTxnResponse(reply, parameters.withPrefix, etcdv3::COMPAREDELETE_ACTION);
-  if (!reply.succeeded())
+
+  // if there is an error code returned by parseResponse, we must
+  // not overwrite it.
+  if (!reply.succeeded() && txn_resp.status.etcd_error_code == etcdv3::StatusCode::OK)
   {
-    txn_resp.error_code = 101;
-    txn_resp.error_message = "Compare failed";
+    txn_resp.status.etcd_error_code = etcdv3::StatusCode::TEST_FAILED;
+    txn_resp.status.etcd_error_message = "Compare failed";
   }
 
   return txn_resp;

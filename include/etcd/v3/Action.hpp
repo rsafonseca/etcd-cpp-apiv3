@@ -6,7 +6,6 @@
 
 using grpc::ClientContext;
 using grpc::CompletionQueue;
-using grpc::Status;
 
 using etcdserverpb::KV;
 using etcdserverpb::Watch;
@@ -45,7 +44,7 @@ namespace etcdv3
     Action(ActionParameters params);
     void waitForResponse();
   protected:
-    Status status;
+    grpc::Status status;
     ClientContext context;
     CompletionQueue cq_;
     ActionParameters parameters;

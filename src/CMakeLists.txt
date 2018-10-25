@@ -35,7 +35,8 @@ set(V3_SOURCES ${V3_SRC_ROOT}/AsyncTxnResponse.cpp
 		 ${V3_SRC_ROOT}/AsyncWatchResponse.cpp
 		 ${V3_SRC_ROOT}/AsyncLeaseGrantResponse.cpp
 		 ${V3_SRC_ROOT}/AsyncLeaseGrantAction.cpp
-		 ${V3_SRC_ROOT}/KeyValue.cpp)
+		 ${V3_SRC_ROOT}/KeyValue.cpp
+		 ${V3_SRC_ROOT}/V3Status.cpp)
 
 add_library(${PROJECT_NAME} ${LIBRARY_TYPE} ${PROTO_SOURCES} ${V3_SOURCES} ${SOURCES})
 
@@ -69,6 +70,7 @@ install(FILES ${V3_HDR_ROOT}/action_constants.hpp
 		${V3_HDR_ROOT}/AsyncTxnResponse.hpp
 		${V3_HDR_ROOT}/AsyncWatchResponse.hpp
 		${V3_HDR_ROOT}/V3Response.hpp
+		${V3_HDR_ROOT}/V3Status.hpp
                DESTINATION include/etcd/v3/)
 
 install(FILES ${V3_PROTO_ROOT}/auth.pb.h

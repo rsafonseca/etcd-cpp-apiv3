@@ -9,8 +9,8 @@ etcdv3::AsyncDeleteRangeResponse::AsyncDeleteRangeResponse(
   revision = resp.header().revision();
   if (resp.prev_kvs_size() == 0)
   {
-    error_code = 100;
-    error_message = "Key not found";
+    status.etcd_error_code = etcdv3::StatusCode::KEY_NOT_FOUND;
+    status.etcd_error_message = "Key not found";
   }
   else
   {

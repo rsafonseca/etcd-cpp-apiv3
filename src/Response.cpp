@@ -1,40 +1,49 @@
 #include <etcd/Response.hpp>
 
-#include <iostream>
 
-
-etcd::Response::Response(int const error_code, char const * const error_message)
-  : error_code(error_code)
-  , error_message(error_message)
+etcd::Response::Response(etcdv3::StatusCode const etcd_error_code, std::string etcd_error_message)
+  : status(etcd_error_code, std::move(etcd_error_message))
 {}
 
-etcd::Response::Response(int const error_code, std::string error_message)
-  : error_code(error_code)
-  , error_message(std::move(error_message))
+etcd::Response::Response(etcdv3::V3Status && status)
+  : status(std::move(status))
 {}
 
-etcd::Response::Response(etcdv3::V3Response && reply)
-  : error_code(reply.error_code)
-  , error_message(std::move(reply.error_message))
-  , revision(reply.revision)
-  , action(std::move(reply.action))
-  , prev_value(std::move(reply.prev_value))
+etcd::Response::Response(etcdv3::V3Status const & status)
+  : status(status)
+{}
+
+etcd::Response::Response(etcdv3::V3Response && response)
+  : revision(response.revision)
+  , status(std::move(response.status))
+  , action(std::move(response.action))
+  , prev_value(std::move(response.prev_value))
 {
-  if(reply.has_values())
+  if(response.has_values())
   {
-    for(size_t index = 0; index < reply.values.size(); index++)
+    for(size_t index = 0; index < response.values.size(); index++)
     {
-      keys.push_back(reply.values[index].kvs.key());
-      values.push_back(Value(std::move(reply.values[index])));
+      keys.push_back(response.values[index].kvs.key());
+      values.push_back(Value(std::move(response.values[index])));
     }
   }
   else
   {
-    value = Value(std::move(reply.value));
+    value = Value(std::move(response.value));
   }
 }
 
 bool etcd::Response::is_ok() const
 {
-  return error_code == 0;
+  return status.is_ok();
+}
+
+bool etcd::Response::etcd_is_ok() const
+{
+  return status.etcd_is_ok();
+}
+
+bool etcd::Response::grpc_is_ok() const
+{
+  return status.grpc_is_ok();
 }

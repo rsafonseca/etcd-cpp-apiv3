@@ -22,8 +22,7 @@ etcdv3::AsyncTxnResponse::AsyncTxnResponse(
       case ResponseOp::ResponseCase::kResponseRange:
       {
         AsyncRangeResponse response(*(resp.mutable_response_range()), prefix);
-        error_code = response.error_code;
-        error_message = std::move(response.error_message);
+        status = std::move(response.status);
         values = std::move(response.values);
         value = std::move(response.value);
         break;
@@ -39,6 +38,7 @@ etcdv3::AsyncTxnResponse::AsyncTxnResponse(
       case ResponseOp::ResponseCase::kResponseDeleteRange:
       {
         AsyncDeleteRangeResponse response(*(resp.mutable_response_delete_range()), prefix);
+        status = std::move(response.status);
         prev_value.kvs = std::move(response.prev_value.kvs);
         values = std::move(response.values);
         value = std::move(response.value);

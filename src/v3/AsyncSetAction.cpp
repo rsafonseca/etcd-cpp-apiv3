@@ -37,8 +37,8 @@ etcdv3::AsyncTxnResponse etcdv3::AsyncSetAction::ParseResponse()
 
   if (!reply.succeeded() && isCreate)
   {
-    txn_resp.error_code = 105;
-    txn_resp.error_message = "Key already exists";
+    txn_resp.status.etcd_error_code = etcdv3::StatusCode::KEY_ALREADY_EXISTS;
+    txn_resp.status.etcd_error_message = "Key already exists";
   }
 
   return txn_resp;
