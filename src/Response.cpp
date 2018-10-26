@@ -1,15 +1,15 @@
 #include <etcd/Response.hpp>
 
 
-etcd::Response::Response(etcdv3::StatusCode const etcd_error_code, std::string etcd_error_message)
+etcd::Response::Response(etcd::StatusCode const etcd_error_code, std::string etcd_error_message)
   : status(etcd_error_code, std::move(etcd_error_message))
 {}
 
-etcd::Response::Response(etcdv3::V3Status && status)
+etcd::Response::Response(etcd::Status && status)
   : status(std::move(status))
 {}
 
-etcd::Response::Response(etcdv3::V3Status const & status)
+etcd::Response::Response(etcd::Status const & status)
   : status(status)
 {}
 

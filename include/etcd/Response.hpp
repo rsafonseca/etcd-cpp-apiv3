@@ -10,6 +10,8 @@
 
 namespace etcd
 {
+  using StatusCode = etcdv3::V3StatusCode;
+  using Status = etcdv3::V3Status;
   typedef std::vector<std::string> Keys;
 
   /**
@@ -18,7 +20,7 @@ namespace etcd
   struct Response
   {
     int64_t          revision = 0;
-    etcdv3::V3Status status; // TODO: replace by common Status later
+    etcd::Status     status;
     std::string      action;
     Value            value;
     Value            prev_value;
@@ -37,9 +39,9 @@ namespace etcd
     }
 
     Response() = default;
-    Response(etcdv3::StatusCode const etcd_error_code, std::string etcd_error_message);
-    explicit Response(etcdv3::V3Status && status);
-    explicit Response(etcdv3::V3Status const & status);
+    Response(etcd::StatusCode const etcd_error_code, std::string etcd_error_message);
+    explicit Response(etcd::Status && status);
+    explicit Response(etcd::Status const & status);
     explicit Response(etcdv3::V3Response && response);
 
     /**

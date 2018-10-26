@@ -18,7 +18,7 @@ namespace etcdv3
     std::vector<etcdv3::KeyValue> prev_values;
 
     V3Response() = default;
-    V3Response(etcdv3::StatusCode const etcd_error_code, std::string etcd_error_message);
+    V3Response(etcdv3::V3StatusCode const etcd_error_code, std::string etcd_error_message);
     V3Response(grpc::StatusCode const grpc_error_code, grpc::string grpc_error_message);
     V3Response(V3Response const &) = delete;
     V3Response & operator =(V3Response const &) = delete;

@@ -11,7 +11,7 @@ etcdv3::AsyncRangeResponse::AsyncRangeResponse(
 
   if (resp.kvs_size() == 0)
   {
-    status.etcd_error_code = etcdv3::StatusCode::KEY_NOT_FOUND;
+    status.etcd_error_code = etcdv3::V3StatusCode::KEY_NOT_FOUND;
     status.etcd_error_message = "Key not found";
   }
   else

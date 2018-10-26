@@ -8,7 +8,7 @@
   }                                             \
   catch (std::exception const & ex)             \
 {                                             \
-  return etcd::Response(etcdv3::StatusCode::USER_DEFINED_ERROR, ex.what());      \
+  return etcd::Response(etcd::StatusCode::USER_DEFINED_ERROR, ex.what());      \
   }
 
 etcd::SyncClient::SyncClient(std::string const & address)
