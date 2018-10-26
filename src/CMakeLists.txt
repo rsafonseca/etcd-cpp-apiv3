@@ -17,8 +17,7 @@ set(PROTO_SOURCES ${V3_PROTO_ROOT}/auth.pb.cc
 		${V3_PROTO_ROOT}/rpc.pb.cc
 		${V3_PROTO_ROOT}/rpc.grpc.pb.cc)
 
-
-set(V3_SOURCES ${V3_SRC_ROOT}/AsyncTxnResponse.cpp 
+set(V3_SOURCES ${V3_SRC_ROOT}/AsyncTxnResponse.cpp
 		 ${V3_SRC_ROOT}/AsyncRangeResponse.cpp
 		 ${V3_SRC_ROOT}/Transaction.cpp
 		 ${V3_SRC_ROOT}/action_constants.cpp
@@ -36,11 +35,24 @@ set(V3_SOURCES ${V3_SRC_ROOT}/AsyncTxnResponse.cpp
 		 ${V3_SRC_ROOT}/AsyncLeaseGrantResponse.cpp
 		 ${V3_SRC_ROOT}/AsyncLeaseGrantAction.cpp
 		 ${V3_SRC_ROOT}/KeyValue.cpp
-		 ${V3_SRC_ROOT}/V3Status.cpp)
+         ${V3_SRC_ROOT}/V3Status.cpp)
+
+find_package(cpprestsdk REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system thread locale random)
 
 add_library(${PROJECT_NAME} ${LIBRARY_TYPE} ${PROTO_SOURCES} ${V3_SOURCES} ${SOURCES})
 
-target_link_libraries(${PROJECT_NAME} ${CPPREST_LIB} boost_system ssl crypto protobuf grpc grpc++ pthread)
+target_include_directories(${PROJECT_NAME} PUBLIC "../include")
+
+target_link_libraries(${PROJECT_NAME}
+    PUBLIC
+    cpprestsdk::cpprest
+    Boost::thread
+    Boost::system
+    OpenSSL::SSL
+    OpenSSL::Crypto
+    libprotobuf
+    grpc++_unsecure)
 
 install(TARGETS ${PROJECT_NAME} DESTINATION lib)
 
