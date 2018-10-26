@@ -45,12 +45,11 @@ add_library(${PROJECT_NAME} ${LIBRARY_TYPE} ${PROTO_SOURCES} ${V3_SOURCES} ${SOU
 target_include_directories(${PROJECT_NAME} PUBLIC "../include")
 
 target_link_libraries(${PROJECT_NAME}
-    PUBLIC
+  PUBLIC
     cpprestsdk::cpprest
+  PRIVATE
     Boost::thread
     Boost::system
-    OpenSSL::SSL
-    OpenSSL::Crypto
     libprotobuf
     grpc++_unsecure)
 
@@ -70,7 +69,7 @@ install(FILES ${V3_HDR_ROOT}/action_constants.hpp
 		${V3_HDR_ROOT}/AsyncRangeResponse.hpp
 		${V3_HDR_ROOT}/AsyncUpdateAction.hpp
 		${V3_HDR_ROOT}/KeyValue.hpp
-		${V3_HDR_ROOT}/Action.hpp	
+		${V3_HDR_ROOT}/Action.hpp
 		${V3_HDR_ROOT}/AsyncDeleteAction.hpp
 		${V3_HDR_ROOT}/AsyncLeaseGrantAction.hpp
 		${V3_HDR_ROOT}/AsyncSetAction.hpp
