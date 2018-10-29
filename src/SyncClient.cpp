@@ -1,5 +1,5 @@
 #include <etcd/SyncClient.hpp>
-#include <etcd/v3/V3Status.h>
+#include <etcd/v3/V3Status.hpp>
 
 #define CHECK_EXCEPTIONS(cmd)                   \
   try                                           \

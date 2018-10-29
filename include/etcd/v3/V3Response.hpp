@@ -3,7 +3,7 @@
 
 #include <grpc++/grpc++.h>
 #include <etcd/v3/KeyValue.hpp>
-#include <etcd/v3/V3Status.h>
+#include <etcd/v3/V3Status.hpp>
 
 namespace etcdv3
 {

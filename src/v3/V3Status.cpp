@@ -1,4 +1,4 @@
-#include <etcd/v3/V3Status.h>
+#include <etcd/v3/V3Status.hpp>
 
 
 etcdv3::V3Status::V3Status()
