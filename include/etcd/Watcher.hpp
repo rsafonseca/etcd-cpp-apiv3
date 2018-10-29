@@ -13,33 +13,41 @@ using grpc::Channel;
 namespace etcd
 {
 
+  class watch_error
+      : public std::runtime_error
+  {
+  public:
+    using std::runtime_error::runtime_error;
+    using std::runtime_error::what;
+  };
+
   class Watcher
   {
   public:
     Watcher(
-        const std::string & address,
-        const std::string & key,
+        std::string const & address,
+        std::string const & key,
         std::function<void(Response)> callback,
-        const pplx::task_options & task_options = pplx::task_options());
+        pplx::task_options const & task_options = pplx::task_options());
     Watcher(
-        const std::shared_ptr<grpc::Channel> & channel,
-        const std::string & key,
+        std::shared_ptr<grpc::Channel> const & channel,
+        std::string const & key,
         std::function<void(Response)> callback,
-        const pplx::task_options & task_options = pplx::task_options());
+        pplx::task_options const & task_options = pplx::task_options());
     Watcher(
-        const std::string & address,
-        const std::string & key,
-        const bool recursive,
-        const int fromIndex,
+        std::string const & address,
+        std::string const & key,
+        bool const recursive,
+        int const fromRevision,
         std::function<void(Response)> callback,
-        const pplx::task_options & task_options = pplx::task_options());
+        pplx::task_options const & task_options = pplx::task_options());
     Watcher(
-        const std::shared_ptr<Channel> & channel,
-        const std::string & key,
-        const bool recursive,
-        const int fromIndex,
+        std::shared_ptr<Channel> const & channel,
+        std::string const & key,
+        bool const recursive,
+        int const fromRevision,
         std::function<void(Response)> callback,
-        const pplx::task_options & task_options = pplx::task_options());
+        pplx::task_options const & task_options = pplx::task_options());
     void cancel();
     bool cancelled() const;
     ~Watcher();

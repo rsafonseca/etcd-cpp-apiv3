@@ -16,6 +16,14 @@ using etcdserverpb::WatchResponse;
 
 namespace etcdv3
 {
+
+  class async_watch_error : std::runtime_error
+  {
+  public:
+    using std::runtime_error::runtime_error;
+    using std::runtime_error::what;
+  };
+
   using watch_callback = std::function<void(etcd::Response &&)>;
 
   class AsyncWatchAction : public etcdv3::Action
