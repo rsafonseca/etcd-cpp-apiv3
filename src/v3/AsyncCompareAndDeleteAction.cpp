@@ -42,9 +42,9 @@ etcdv3::AsyncTxnResponse etcdv3::AsyncCompareAndDeleteAction::ParseResponse()
 
   // if there is an error code returned by parseResponse, we must
   // not overwrite it.
-  if (!reply.succeeded() && txn_resp.status.etcd_error_code == etcdv3::StatusCode::OK)
+  if (!reply.succeeded() && txn_resp.status.etcd_error_code == etcdv3::V3StatusCode::OK)
   {
-    txn_resp.status.etcd_error_code = etcdv3::StatusCode::TEST_FAILED;
+    txn_resp.status.etcd_error_code = etcdv3::V3StatusCode::TEST_FAILED;
     txn_resp.status.etcd_error_message = "Compare failed";
   }
 

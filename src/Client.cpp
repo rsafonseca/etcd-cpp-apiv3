@@ -279,6 +279,7 @@ pplx::task<etcd::Response> etcd::Client::ls(std::string const & key)
   return Response::create(std::make_shared<etcdv3::AsyncGetAction>(std::move(params)), _task_options);
 }
 
+// TODO: remove watch from client, rename to Client to KVClient
 pplx::task<etcd::Response> etcd::Client::watch(std::string const & key, bool const recursive)
 {
   return watch(key, 0, recursive);

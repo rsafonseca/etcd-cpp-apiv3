@@ -1,7 +1,7 @@
 #include <etcd/v3/V3Response.hpp>
 
 
-etcdv3::V3Response::V3Response(etcdv3::StatusCode const etcd_error_code, std::string etcd_error_message)
+etcdv3::V3Response::V3Response(V3StatusCode const etcd_error_code, std::string etcd_error_message)
   : status(etcd_error_code, std::move(etcd_error_message))
 {}
 

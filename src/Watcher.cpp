@@ -1,52 +1,77 @@
 #include <etcd/Utils.hpp>
 #include <etcd/Watcher.hpp>
-#include <etcd/Client.hpp>
+#include <etcd/v3/AsyncGetAction.hpp>
 
 
 etcd::Watcher::Watcher(
-    const std::string & address,
-    const std::string & key,
+    std::string const & address,
+    std::string const & key,
     std::function<void(Response)> callback,
-    const pplx::task_options & task_options)
+    pplx::task_options const & task_options)
   : Watcher::Watcher(etcd::utils::createChannel(address), key, true, 0, callback, task_options)
 {}
 
 etcd::Watcher::Watcher(
-    const std::shared_ptr<grpc::Channel> & channel,
-    const std::string & key,
+    std::shared_ptr<grpc::Channel> const & channel,
+    std::string const & key,
     std::function<void(Response)> callback,
-    const pplx::task_options & task_options)
+    pplx::task_options const & task_options)
   : Watcher::Watcher(channel, key, true, 0, callback, task_options)
 {}
 
 etcd::Watcher::Watcher(
-    const std::string & address,
-    const std::string & key,
-    const bool recursive,
-    const int fromIndex,
+    std::string const & address,
+    std::string const & key,
+    bool const recursive,
+    int const fromRevision,
     std::function<void(Response)> callback,
-    const pplx::task_options & task_options)
-  : Watcher::Watcher(etcd::utils::createChannel(address), key, recursive, fromIndex, callback, task_options)
+    pplx::task_options const & task_options)
+  : Watcher::Watcher(etcd::utils::createChannel(address), key, recursive, fromRevision, callback, task_options)
 {}
 
 etcd::Watcher::Watcher(
-    const std::shared_ptr<grpc::Channel> & channel,
-    const std::string & key,
-    const bool recursive,
-    const int fromIndex,
+    std::shared_ptr<grpc::Channel> const & channel,
+    std::string const & key,
+    bool const recursive,
+    int const fromRevision,
     std::function<void(Response)> callback,
-    const pplx::task_options & task_options)
+    pplx::task_options const & task_options)
   : channel(channel)
   , watchServiceStub(Watch::NewStub(channel))
   , task_options(task_options)
   , callback(callback)
   , isCancelled(false)
 {
+  auto fromRevisionExplicit = fromRevision;
+  if (fromRevisionExplicit == 0)
+  {
+    const auto stub = etcdserverpb::KV::NewStub(channel);
+    etcdv3::ActionParameters get_params;
+    get_params.key.assign(key);
+    get_params.withPrefix = recursive;
+    get_params.kv_stub = stub.get();
+    auto get_call = std::make_shared<etcdv3::AsyncGetAction>(std::move(get_params));
+    get_call->waitForResponse();
+    fromRevisionExplicit = get_call->ParseResponse().revision;
+    if (fromRevisionExplicit == 0)
+    {
+      throw watch_error("cannot acquire current etcd key-value store revision");
+    }
+  }
   watch_action_parameters.key = key;
   watch_action_parameters.withPrefix = recursive;
-  watch_action_parameters.revision = fromIndex;
   watch_action_parameters.watch_stub = watchServiceStub.get();
-  doWatch();
+  // if fromRevision is 0, interested revision for user is current + 1
+  watch_action_parameters.revision = fromRevisionExplicit + (fromRevision == 0 ? 1 : 0);
+  try
+  {
+    doWatch();
+  }
+  catch (etcdv3::async_watch_error const & e)
+  {
+    throw watch_error(e.what());
+  }
+
 }
 
 void etcd::Watcher::cancel()
@@ -82,15 +107,20 @@ void etcd::Watcher::doWatch()
 {
   try
   {
-    if (call) {
-      // in case of watch recreate, continue from last received revision
-      watch_action_parameters.revision = call->lastRevision();
+    if (call)
+    {
       call->cancelWatch();
     }
     currentTask.wait();
   }
   catch (...)
   {}
+  if (call)
+  {
+    // in case of watch recreate, continue from revision next after last received revision
+    // lastRevision always returns explicit revision number (not 0)
+    watch_action_parameters.revision = call->lastRevision() + 1;
+  }
   call.reset(new etcdv3::AsyncWatchAction(watch_action_parameters));
   currentTask = pplx::task<void>([this]()
   {

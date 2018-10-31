@@ -30,8 +30,8 @@ TEST_CASE("add a new key")
   CHECK(0 < val.created_revision);
   CHECK(0 < val.modified_revision);
   CHECK(0 < resp.revision); // X-Etcd-Index header value
-  CHECK(etcdv3::StatusCode::KEY_ALREADY_EXISTS == etcd.add("/test/key1", "43").get().status.etcd_error_code); // Key already exists
-  CHECK(etcdv3::StatusCode::KEY_ALREADY_EXISTS == etcd.add("/test/key1", "42").get().status.etcd_error_code); // Key already exists
+  CHECK(etcd::StatusCode::KEY_ALREADY_EXISTS == etcd.add("/test/key1", "43").get().status.etcd_error_code); // Key already exists
+  CHECK(etcd::StatusCode::KEY_ALREADY_EXISTS == etcd.add("/test/key1", "42").get().status.etcd_error_code); // Key already exists
   CHECK("Key already exists" == etcd.add("/test/key1", "42").get().status.etcd_error_message);
 }
 
@@ -51,7 +51,7 @@ TEST_CASE("simplified read")
 {
   etcd::Client etcd( z10);
   CHECK("42" == etcd.get("/test/key1").get().value.value);
-  CHECK(etcdv3::StatusCode::KEY_NOT_FOUND == etcd.get("/test/key2").get().status.etcd_error_code); // Key not found
+  CHECK(etcd::StatusCode::KEY_NOT_FOUND == etcd.get("/test/key2").get().status.etcd_error_code); // Key not found
   CHECK(""  == etcd.get("/test/key2").get().value.value); // Key not found
 }
 
@@ -63,7 +63,7 @@ TEST_CASE("modify a key")
   etcd::Response resp = etcd.modify("/test/key1", "43").get();
   REQUIRE(resp.is_ok()); // overwrite
   CHECK("update" == resp.action);
-  CHECK(etcdv3::StatusCode::KEY_NOT_FOUND == etcd.modify("/test/key2", "43").get().status.etcd_error_code); // Key not found
+  CHECK(etcd::StatusCode::KEY_NOT_FOUND == etcd.modify("/test/key2", "43").get().status.etcd_error_code); // Key not found
   CHECK("43" == etcd.modify("/test/key1", "42").get().prev_value.value);
 }
 
@@ -103,13 +103,13 @@ TEST_CASE("atomic compare-and-swap")
   // modify fails the second time
   res = etcd.modify_if("/test/key1", "44", "42").get();
   CHECK(!res.is_ok());
-  CHECK(etcdv3::StatusCode::TEST_FAILED == res.status.etcd_error_code);
+  CHECK(etcd::StatusCode::TEST_FAILED == res.status.etcd_error_code);
   CHECK("Compare failed" == res.status.etcd_error_message);
 
   // modify fails the second time
   res = etcd.modify_if("/test/key222", "44", "42").get();
   CHECK(!res.is_ok());
-  CHECK(etcdv3::StatusCode::KEY_NOT_FOUND == res.status.etcd_error_code);
+  CHECK(etcd::StatusCode::KEY_NOT_FOUND == res.status.etcd_error_code);
   CHECK("Key not found" == res.status.etcd_error_message);
 
 }
@@ -120,7 +120,7 @@ TEST_CASE("delete a value")
   etcd::Client etcd( z10);
   etcd::Response resp = etcd.rm("/test/key11111").get();
   CHECK(!resp.is_ok());
-  CHECK(etcdv3::StatusCode::KEY_NOT_FOUND == resp.status.etcd_error_code);
+  CHECK(etcd::StatusCode::KEY_NOT_FOUND == resp.status.etcd_error_code);
   CHECK("Key not found" == resp.status.etcd_error_message);
 
   int revision = etcd.get("/test/key1").get().revision;
@@ -144,7 +144,7 @@ TEST_CASE("atomic compare-and-delete based on prevValue")
   etcd.set("/test/key1", "42").wait();
   etcd::Response res = etcd.rm_if("/test/key1", "43").get();
   CHECK(!res.is_ok());
-  CHECK(etcdv3::StatusCode::TEST_FAILED == res.status.etcd_error_code);
+  CHECK(etcd::StatusCode::TEST_FAILED == res.status.etcd_error_code);
   CHECK("Compare failed" == res.status.etcd_error_message);
   res = etcd.rm_if("/test/key1", "42").get();
   REQUIRE(res.is_ok());
@@ -158,7 +158,7 @@ TEST_CASE("atomic compare-and-delete based on prevIndex")
   int revision = etcd.set("/test/key1", "42").get().revision;
   etcd::Response res = etcd.rm_if("/test/key1", revision - 1).get();
   CHECK(!res.is_ok());
-  CHECK(etcdv3::StatusCode::TEST_FAILED == res.status.etcd_error_code);
+  CHECK(etcd::StatusCode::TEST_FAILED == res.status.etcd_error_code);
   CHECK("Compare failed" == res.status.etcd_error_message);
 
   res = etcd.rm_if("/test/key1", revision).get();
@@ -183,7 +183,7 @@ TEST_CASE("deep atomic compare-and-swap")
   // modify fails the second time
   res = etcd.modify_if("/test/key1", "44", "42").get();
   CHECK(!res.is_ok());
-  CHECK(etcdv3::StatusCode::TEST_FAILED == res.status.etcd_error_code);
+  CHECK(etcd::StatusCode::TEST_FAILED == res.status.etcd_error_code);
   CHECK("Compare failed" == res.status.etcd_error_message);
 
 
@@ -196,7 +196,7 @@ TEST_CASE("deep atomic compare-and-swap")
   // revision changes so second modify fails
   res = etcd.modify_if("/test/key1", "45", revision).get();
   CHECK(!res.is_ok());
-  CHECK(etcdv3::StatusCode::TEST_FAILED == res.status.etcd_error_code);
+  CHECK(etcd::StatusCode::TEST_FAILED == res.status.etcd_error_code);
   CHECK("Compare failed" == res.status.etcd_error_message);
 
 }
@@ -263,12 +263,12 @@ TEST_CASE("delete a directory")
 
   resp = etcd.rmdir("/test/dirnotfound", true).get();
   CHECK(!resp.is_ok());
-  CHECK(etcdv3::StatusCode::KEY_NOT_FOUND == resp.status.etcd_error_code);
+  CHECK(etcd::StatusCode::KEY_NOT_FOUND == resp.status.etcd_error_code);
   CHECK("Key not found" == resp.status.etcd_error_message);
 
   resp = etcd.rmdir("/test/new_dir", false).get();
   CHECK(!resp.is_ok());
-  CHECK(etcdv3::StatusCode::KEY_NOT_FOUND == resp.status.etcd_error_code);
+  CHECK(etcd::StatusCode::KEY_NOT_FOUND == resp.status.etcd_error_code);
   CHECK("Key not found" == resp.status.etcd_error_message);
 }
 

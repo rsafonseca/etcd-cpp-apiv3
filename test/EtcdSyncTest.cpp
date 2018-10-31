@@ -15,14 +15,14 @@ TEST_CASE("sync operations")
   auto resp = etcd.add("/test/key1", "42");
 
   CHECK(resp.grpc_is_ok());
-  CHECK(etcdv3::StatusCode::KEY_ALREADY_EXISTS == resp.status.etcd_error_code); // Key already exists
+  CHECK(etcd::StatusCode::KEY_ALREADY_EXISTS == resp.status.etcd_error_code); // Key already exists
   CHECK("42" == etcd.get("/test/key1").value.value);
 
   // modify
   CHECK(etcd.modify("/test/key1", "43").is_ok());
   resp = etcd.modify("/test/key2", "43");
   CHECK(resp.grpc_is_ok());
-  CHECK(etcdv3::StatusCode::KEY_NOT_FOUND == resp.status.etcd_error_code); // Key not found
+  CHECK(etcd::StatusCode::KEY_NOT_FOUND == resp.status.etcd_error_code); // Key not found
   CHECK("43" == etcd.modify("/test/key1", "42").prev_value.value);
 
   // set
@@ -56,24 +56,24 @@ TEST_CASE("sync operations")
   int revision = etcd.modify_if("/test/key1", "43", "42").revision;
   resp = etcd.modify_if("/test/key1", "44", "42");
   CHECK(resp.grpc_is_ok());
-  CHECK(etcdv3::StatusCode::TEST_FAILED == resp.status.etcd_error_code);
+  CHECK(etcd::StatusCode::TEST_FAILED == resp.status.etcd_error_code);
   REQUIRE(etcd.modify_if("/test/key1", "44", revision).is_ok());
   resp = etcd.modify_if("/test/key1", "45", revision);
   CHECK(resp.grpc_is_ok());
-  CHECK(etcdv3::StatusCode::TEST_FAILED == resp.status.etcd_error_code);
+  CHECK(etcd::StatusCode::TEST_FAILED == resp.status.etcd_error_code);
 
   // atomic compare-and-delete based on prevValue
   etcd.set("/test/key1", "42");
   resp = etcd.rm_if("/test/key1", "43");
   CHECK(resp.grpc_is_ok());
-  CHECK(etcdv3::StatusCode::TEST_FAILED == resp.status.etcd_error_code);
+  CHECK(etcd::StatusCode::TEST_FAILED == resp.status.etcd_error_code);
   CHECK(etcd.rm_if("/test/key1", "42").is_ok());
 
   // atomic compare-and-delete based on prevIndex
   revision = etcd.set("/test/key1", "42").revision;
   resp = etcd.rm_if("/test/key1", revision - 1);
   CHECK(resp.grpc_is_ok());
-  CHECK(etcdv3::StatusCode::TEST_FAILED == resp.status.etcd_error_code);
+  CHECK(etcd::StatusCode::TEST_FAILED == resp.status.etcd_error_code);
   CHECK(etcd.rm_if("/test/key1", revision).is_ok());
 
   //leasegrant
