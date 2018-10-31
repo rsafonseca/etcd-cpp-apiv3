@@ -15,8 +15,9 @@ namespace etcd
   /**
    * The Reponse object received for the requests of etcd::Client
    */
-  struct Response
+  class Response
   {
+  public:
     int64_t          revision = 0;
     etcdv3::V3Status status; // TODO: replace by common Status later
     std::string      action;
