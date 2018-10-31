@@ -16,9 +16,12 @@ namespace etcdv3
     {
     public:
         AsyncKeepAliveAction(etcdv3::ActionParameters param);
+        ~AsyncKeepAliveAction();
         AsyncKeepAliveResponse ParseResponse();
 
         void waitForResponse();
+        void setLeaseId(int64_t lease_id);
+
     private:
         LeaseKeepAliveResponse _response;
         std::unique_ptr<ClientAsyncReaderWriter<LeaseKeepAliveRequest,LeaseKeepAliveResponse>> _stream;

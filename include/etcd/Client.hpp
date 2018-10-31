@@ -4,7 +4,9 @@
 #include <etcd/Response.hpp>
 #include <etcd/v3/Transaction.hpp>
 #include <etcd/v3/AsyncTxnResponse.hpp>
+#include <etcd/v3/AsyncKeepAliveAction.hpp>
 #include <etcd/v3/Action.hpp>
+#include <memory>
 
 #include <string>
 
@@ -203,6 +205,7 @@ namespace etcd
         const std::unique_ptr<Watch::Stub> _watch_service_stub;
         const std::unique_ptr<Lease::Stub> _lease_service_stub;
         const pplx::task_options _task_options;
+        std::shared_ptr<etcdv3::AsyncKeepAliveAction> _keepAliveAction;
     };
 
 }
