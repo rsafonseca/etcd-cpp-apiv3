@@ -1,5 +1,5 @@
 #include <memory>
-#include <etcd/Utils.h>
+#include <etcd/Utils.hpp>
 #include <etcd/Client.hpp>
 #include <etcd/v3/AsyncTxnResponse.hpp>
 #include <etcd/v3/AsyncRangeResponse.hpp>
