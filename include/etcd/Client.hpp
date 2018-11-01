@@ -200,6 +200,12 @@ namespace etcd
          */
         pplx::task<Response> lease_keep_alive(int64_t const id);
 
+        /**
+         * Revokes a lease.
+         * @param id is the lease id.
+         */
+        pplx::task<Response> lease_revoke(int64_t const id);
+
     private:
         const std::unique_ptr<KV::Stub> _stub;
         const std::unique_ptr<Watch::Stub> _watch_service_stub;

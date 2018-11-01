@@ -35,6 +35,8 @@ set(V3_HEADERS
     ${V3_HDR_ROOT}/Action.hpp
     ${V3_HDR_ROOT}/AsyncDeleteAction.hpp
     ${V3_HDR_ROOT}/AsyncLeaseGrantAction.hpp
+    ${V3_HDR_ROOT}/AsyncLeaseRevokeAction.hpp
+    ${V3_HDR_ROOT}/AsyncLeaseRevokeResponse.hpp
     ${V3_HDR_ROOT}/AsyncSetAction.hpp
     ${V3_HDR_ROOT}/AsyncWatchAction.hpp
     ${V3_HDR_ROOT}/Transaction.hpp
@@ -66,6 +68,8 @@ set(V3_SOURCES
     ${V3_SRC_ROOT}/AsyncWatchResponse.cpp
     ${V3_SRC_ROOT}/AsyncLeaseGrantResponse.cpp
     ${V3_SRC_ROOT}/AsyncLeaseGrantAction.cpp
+    ${V3_SRC_ROOT}/AsyncLeaseRevokeAction.cpp
+    ${V3_SRC_ROOT}/AsyncLeaseRevokeResponse.cpp
     ${V3_SRC_ROOT}/AsyncKeepAliveAction.cpp
     ${V3_SRC_ROOT}/AsyncKeepAliveResponse.cpp
     ${V3_SRC_ROOT}/KeyValue.cpp

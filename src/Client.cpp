@@ -8,6 +8,7 @@
 #include <etcd/v3/Transaction.hpp>
 #include <etcd/v3/AsyncKeepAliveAction.hpp>
 #include <etcd/v3/AsyncKeepAliveResponse.hpp>
+#include <etcd/v3/AsyncLeaseRevokeAction.hpp>
 #include <iostream>
 
 #include <etcd/v3/AsyncSetAction.hpp>
@@ -301,6 +302,14 @@ pplx::task<etcd::Response> etcd::Client::leasegrant(int const ttl)
   params.ttl = ttl;
   params.lease_stub = _lease_service_stub.get();
   return Response::create(std::make_shared<etcdv3::AsyncLeaseGrantAction>(std::move(params)), _task_options);
+}
+
+pplx::task<etcd::Response> etcd::Client::lease_revoke(int64_t const id)
+{
+    etcdv3::ActionParameters params;
+    params.lease_id = id;
+    params.lease_stub = _lease_service_stub.get();
+    return Response::create(std::make_shared<etcdv3::AsyncLeaseRevokeAction>(std::move(params)), _task_options);
 }
 
 pplx::task<etcd::Response> etcd::Client::lease_keep_alive(int64_t const id)
