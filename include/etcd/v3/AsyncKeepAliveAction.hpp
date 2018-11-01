@@ -16,7 +16,6 @@ namespace etcdv3
     {
     public:
         AsyncKeepAliveAction(etcdv3::ActionParameters param);
-        ~AsyncKeepAliveAction();
         AsyncKeepAliveResponse ParseResponse();
 
         void waitForResponse();

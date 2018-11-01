@@ -33,25 +33,6 @@ etcdv3::AsyncKeepAliveAction::AsyncKeepAliveAction(ActionParameters param)
     GPR_ASSERT(tag == Type::Connect);
 }
 
-etcdv3::AsyncKeepAliveAction::~AsyncKeepAliveAction()
-{
-    grpc::Status status;
-    _stream->Finish(&status, reinterpret_cast<void*>(Type::Finish));
-
-    void *got_tag = nullptr;
-    bool ok = false;
-    if (cq_.Next(&got_tag, &ok)) {
-        Type tag = static_cast<Type>(reinterpret_cast<size_t>(got_tag));
-        GPR_ASSERT(tag == Type::Finish);
-
-        if (status.ok()) {
-            std::cout << "Finished stream successfuly" << std::endl;
-        } else {
-            std::cerr << "Failed to finish stream" << std::endl;
-        }
-    }
-}
-
 void etcdv3::AsyncKeepAliveAction::waitForResponse()
 {
     LeaseKeepAliveRequest keep_alive_req;
