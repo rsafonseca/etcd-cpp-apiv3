@@ -91,11 +91,11 @@ target_include_directories(${PROJECT_NAME} PUBLIC "../include")
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
     cpprestsdk::cpprest
+    grpc++_unsecure
   PRIVATE
     Boost::thread
     Boost::system
-    libprotobuf
-    grpc++_unsecure)
+    libprotobuf)
 
 install(TARGETS ${PROJECT_NAME} DESTINATION lib)
 
