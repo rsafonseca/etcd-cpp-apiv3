@@ -56,7 +56,6 @@ etcdv3::AsyncWatchAction::AsyncWatchAction(etcdv3::ActionParameters param)
       ok = false;
       if (cq_.Next(&got_tag, &ok) && ok && got_tag == reinterpret_cast<void*>(Type::Read))
       {
-        std::cout << "Got watch id: " << response.watch_id() << std::endl;
         _watchId = response.watch_id();
         // parse create response
         storeLastRevision();
