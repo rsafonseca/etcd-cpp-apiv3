@@ -75,6 +75,12 @@ set(V3_SOURCES
     ${V3_SRC_ROOT}/KeyValue.cpp
     ${V3_SRC_ROOT}/V3Status.cpp)
 
+if(UNIX AND NOT APPLE)
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a")
+else()
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ".a" ".lib" ".dylib" ".so" ".dll")
+endif()
+
 find_package(cpprestsdk REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system thread locale random)
 
