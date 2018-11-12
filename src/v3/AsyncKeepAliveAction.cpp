@@ -1,5 +1,6 @@
 #include "etcd/v3/AsyncKeepAliveAction.hpp"
 #include <etcd/v3/Transaction.hpp>
+#include <chrono>
 
 using etcdserverpb::LeaseGrantRequest;
 
@@ -38,15 +39,27 @@ void etcdv3::AsyncKeepAliveAction::waitForResponse()
     LeaseKeepAliveRequest keep_alive_req;
     keep_alive_req.set_id(parameters.lease_id);
 
-    _stream->Write(keep_alive_req, reinterpret_cast<void*>(Type::Write));
-
     void* got_tag = nullptr;
     bool ok = false;
 
-    while (cq_.Next(&got_tag, &ok)) {
+    auto deadline = std::chrono::system_clock::now() + std::chrono::milliseconds(1);
+    CompletionQueue::NextStatus nextStatus = cq_.AsyncNext(&got_tag, &ok, deadline);
+
+    if (nextStatus == CompletionQueue::SHUTDOWN) {
+        return;
+    }
+
+    _stream->Write(keep_alive_req, reinterpret_cast<void*>(Type::Write));
+
+    for (;;) {
+        if (!cq_.Next(&got_tag, &ok)) {
+            break;
+        }
+
         if (!ok) {
+            _stream->Finish(&status, reinterpret_cast<void*>(Type::Finish));
             cq_.Shutdown();
-            return;
+            continue;
         }
 
         switch (static_cast<Type>(reinterpret_cast<size_t>(got_tag))) {
@@ -55,6 +68,8 @@ void etcdv3::AsyncKeepAliveAction::waitForResponse()
             case Type::Write:
                 _stream->Read(&_response, reinterpret_cast<void*>(Type::Read));
                 break;
+            case Type::Finish:
+                return;
             default:
                 GPR_ASSERT(false);
                 break;
