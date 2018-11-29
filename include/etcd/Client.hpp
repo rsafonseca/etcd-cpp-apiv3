@@ -201,6 +201,14 @@ namespace etcd
         pplx::task<Response> lease_keep_alive(int64_t const id);
 
         /**
+         * Stops a lease keep alive.
+         */
+        void stop_lease_keep_alive()
+        {
+            _keepAliveAction.reset();
+        }
+
+        /**
          * Revokes a lease.
          * @param id is the lease id.
          */
