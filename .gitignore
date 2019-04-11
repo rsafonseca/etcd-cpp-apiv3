@@ -51,3 +51,5 @@ etcd-cpp-apiv3.config
 etcd-cpp-apiv3.creator
 etcd-cpp-apiv3.files
 etcd-cpp-apiv3.includes
+
+.ccls-cache

@@ -34,7 +34,9 @@ include_directories(${HDR_ROOT})
 add_subdirectory(${SRC_ROOT})
 
 # Tests
-set(TEST_PROJECT test_${PROJECT_NAME})
-add_test(NAME ${TEST_PROJECT} COMMAND ${TEST_PROJECT})
-add_subdirectory(${TST_ROOT})
-enable_testing()
+if(BUILD_TESTING)
+    set(TEST_PROJECT test_${PROJECT_NAME})
+    add_test(NAME ${TEST_PROJECT} COMMAND ${TEST_PROJECT})
+    add_subdirectory(${TST_ROOT})
+    enable_testing()
+endif()
