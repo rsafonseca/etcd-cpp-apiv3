@@ -271,11 +271,12 @@ pplx::task<etcd::Response> etcd::Client::rmdir(std::string const & key, bool con
   return Response::create(std::make_shared<etcdv3::AsyncDeleteAction>(std::move(params)), _task_options);
 }
 
-pplx::task<etcd::Response> etcd::Client::ls(std::string const & key)
+pplx::task<etcd::Response> etcd::Client::ls(std::string const & key, bool const keysOnly)
 {
   etcdv3::ActionParameters params;
   params.key.assign(key);
   params.withPrefix = true;
+  params.keysOnly = keysOnly;
   params.kv_stub = _stub.get();
   return Response::create(std::make_shared<etcdv3::AsyncGetAction>(std::move(params)), _task_options);
 }

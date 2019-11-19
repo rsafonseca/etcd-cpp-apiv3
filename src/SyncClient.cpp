@@ -92,9 +92,9 @@ etcd::Response etcd::SyncClient::rmdir(std::string const & key, bool const recur
   CHECK_EXCEPTIONS(client.rmdir(key, recursive).get());
 }
 
-etcd::Response etcd::SyncClient::ls(std::string const & key)
+etcd::Response etcd::SyncClient::ls(std::string const & key, bool const keysOnly)
 {
-  CHECK_EXCEPTIONS(client.ls(key).get());
+  CHECK_EXCEPTIONS(client.ls(key, keysOnly).get());
 }
 
 etcd::Response etcd::SyncClient::leasegrant(int const ttl)
