@@ -82,7 +82,7 @@ else()
 endif()
 
 find_package(cpprestsdk REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system thread locale random)
+find_package(Boost REQUIRED)
 
 add_library(${PROJECT_NAME}
     ${LIBRARY_TYPE}
@@ -99,8 +99,8 @@ target_link_libraries(${PROJECT_NAME}
     cpprestsdk::cpprest
     grpc++_unsecure
   PRIVATE
-    Boost::thread
-    Boost::system
+    #Boost::thread
+    #Boost::system
     libprotobuf)
 
 install(TARGETS ${PROJECT_NAME} DESTINATION lib)
