@@ -160,7 +160,7 @@ namespace etcd
          * Gets a directory listing of the directory identified by the key.
          * @param key is the key to be listed
          */
-        pplx::task<Response> ls(std::string const & key);
+        pplx::task<Response> ls(std::string const & key, bool const keysOnly = false);
 
 
         /**

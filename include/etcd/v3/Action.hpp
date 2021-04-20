@@ -25,6 +25,7 @@ namespace etcdv3
     ActionParameters(ActionParameters &&) = default;
     ActionParameters(ActionParameters const &) = default;
     bool withPrefix = false;
+    bool keysOnly = false;
     int64_t revision = 0;
     int64_t old_revision = 0;
     int64_t lease_id = 0;

@@ -36,7 +36,7 @@ namespace etcd
     Response rm(std::string const & key);
     Response rm_if(std::string const & key, std::string const & old_value);
     Response rm_if(std::string const & key, int64_t const old_revision);
-    Response ls(std::string const & key);
+    Response ls(std::string const & key, bool const keysOnly = false);
     Response mkdir(std::string const & key, int const ttl = 0);
     Response rmdir(std::string const & key, bool const recursive = false);
     Response leasegrant(int const ttl);
